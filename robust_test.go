@@ -47,6 +47,8 @@ func Test_Orient2d(t *testing.T) {
 		acy := a[1] - c[1]
 		bcy := b[1] - c[1]
 		fmt.Println(i, "golang", acx*bcy-acy*bcx)
+
+		fmt.Println(i, "neilpa", (b[0]-a[0])*(c[1]-a[1])-(c[0]-a[0])*(b[1]-a[1]))
 		fmt.Println()
 	}
 }
