@@ -50,3 +50,52 @@ func Test_Orient2d(t *testing.T) {
 		fmt.Println()
 	}
 }
+
+func Test_Orient3d(t *testing.T) {
+	tests := []struct {
+		ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz float64
+	}{
+		{0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1},
+	}
+	for i, tt := range tests {
+		a := [3]float64{tt.ax, tt.ay, tt.az}
+		b := [3]float64{tt.bx, tt.by, tt.bz}
+		c := [3]float64{tt.cx, tt.cy, tt.cz}
+		d := [3]float64{tt.dx, tt.dy, tt.dz}
+
+		fmt.Println(i, "robust", robust.Orient3d(a, b, c, d))
+	}
+}
+
+func Test_InCircle(t *testing.T) {
+	tests := []struct {
+		ax, ay, bx, by, cx, cy, dx, dy float64
+	}{
+		{0, 0, 0, 1, 1, 0, 0.5, 0.5},
+	}
+	for i, tt := range tests {
+		a := [2]float64{tt.ax, tt.ay}
+		b := [2]float64{tt.bx, tt.by}
+		c := [2]float64{tt.cx, tt.cy}
+		d := [2]float64{tt.dx, tt.dy}
+
+		fmt.Println(i, "robust", robust.InCircle(a, b, c, d))
+	}
+}
+
+func Test_InSphere(t *testing.T) {
+	tests := []struct {
+		ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, ez float64
+	}{
+		{0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, 0.5},
+	}
+	for i, tt := range tests {
+		a := [3]float64{tt.ax, tt.ay, tt.az}
+		b := [3]float64{tt.bx, tt.by, tt.bz}
+		c := [3]float64{tt.cx, tt.cy, tt.cz}
+		d := [3]float64{tt.dx, tt.dy, tt.dz}
+		e := [3]float64{tt.ex, tt.ey, tt.ez}
+
+		fmt.Println(i, "robust", robust.InSphere(a, b, c, d, e))
+	}
+}
