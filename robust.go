@@ -1,6 +1,11 @@
 // Package robust provides Go bindings to the `predicates.c` library from
 // Jonathan Shewchuk. Only the primary adaptive functions are exported from
 // this package.
+//
+// All arguments are []float64 values presenting either 2D or 3D points
+// depending on the function and must have at least that many elements. This
+// makes it convenient to directly operate on flat buffers of polygon or
+// polyhedra vertices.
 package robust
 
 // void exactinit();
@@ -23,7 +28,9 @@ func init() {
 // order; and zero if they are collinear. The result is also a rough
 // approximation of twice the signed area of the triangle defined by the
 // three points.
-func Orient2d(a, b, c [2]float64) float64 {
+//
+// Each point slice must be at least 2 elements long
+func Orient2d(a, b, c []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
@@ -37,7 +44,7 @@ func Orient2d(a, b, c [2]float64) float64 {
 // zero if the points are coplanar. The result is also a rough
 // approximation of six times the signed volume of the tetrahedron
 // defined by the four points.
-func Orient3d(a, b, c, d [3]float64) float64 {
+func Orient3d(a, b, c, d []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
@@ -50,7 +57,7 @@ func Orient3d(a, b, c, d [3]float64) float64 {
 // outside; and zero if the four points are cocircular. The points
 // a, b, and c must be in counterclockwise order, or the sign of the
 // result will be reversed.
-func InCircle(a, b, c, d [2]float64) float64 {
+func InCircle(a, b, c, d []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
@@ -63,7 +70,7 @@ func InCircle(a, b, c, d [2]float64) float64 {
 // outside; and zero if the five points are cospherical. The points a,
 // b, c, and d must be ordered so that they have a positive orientation
 // (as defined by orient3d()), or the sign of the result will be reversed.
-func InSphere(a, b, c, d, e [3]float64) float64 {
+func InSphere(a, b, c, d, e []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
@@ -76,7 +83,7 @@ func InSphere(a, b, c, d, e [3]float64) float64 {
 // to check against the robust variants but should be avoided otherwise.
 
 // Orient2dFast is the naive, non-robust orient2d check.
-func Orient2dFast(a, b, c [2]float64) float64 {
+func Orient2dFast(a, b, c []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
@@ -84,7 +91,7 @@ func Orient2dFast(a, b, c [2]float64) float64 {
 }
 
 // Orient3dFast is the naive, non-robust orient3d check.
-func Orient3dFast(a, b, c, d [3]float64) float64 {
+func Orient3dFast(a, b, c, d []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
@@ -93,7 +100,7 @@ func Orient3dFast(a, b, c, d [3]float64) float64 {
 }
 
 // InCircleFast is the naive, non-robust incircle check.
-func InCircleFast(a, b, c, d [2]float64) float64 {
+func InCircleFast(a, b, c, d []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
@@ -102,7 +109,7 @@ func InCircleFast(a, b, c, d [2]float64) float64 {
 }
 
 // InSphereFast is the naive, non-robust insphere check.
-func InSphereFast(a, b, c, d, e [3]float64) float64 {
+func InSphereFast(a, b, c, d, e []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])

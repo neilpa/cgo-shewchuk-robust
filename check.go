@@ -33,9 +33,9 @@ func main() {
 		{0.50000000000001243, 0.50000000000000189, 24.000000000000068, 24.000000000000071, 17.300000000000001, 17.300000000000001},
 	}
 	for i, tt := range tests {
-		a := [2]float64{tt.ax, tt.ay}
-		b := [2]float64{tt.bx, tt.by}
-		c := [2]float64{tt.cx, tt.cy}
+		a := []float64{tt.ax, tt.ay}
+		b := []float64{tt.bx, tt.by}
+		c := []float64{tt.cx, tt.cy}
 		fmt.Println(i, "robust", robust.Orient2d(a, b, c))
 		fmt.Println(i, "faster", robust.Orient2dFast(a, b, c))
 

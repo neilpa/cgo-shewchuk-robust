@@ -42,9 +42,9 @@ func Test_Orient2d(t *testing.T) {
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("basic: %d", i), func(t *testing.T) {
-			a := [2]float64{tt.ax, tt.ay}
-			b := [2]float64{tt.bx, tt.by}
-			c := [2]float64{tt.cx, tt.cy}
+			a := []float64{tt.ax, tt.ay}
+			b := []float64{tt.bx, tt.by}
+			c := []float64{tt.cx, tt.cy}
 			assert(t, tt.want, robust.Orient2d(a, b, c))
 		})
 	}
@@ -52,9 +52,9 @@ func Test_Orient2d(t *testing.T) {
 	fixtures := load(t, "orient.2d", 6)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
-			a := [2]float64{tt.args[0], tt.args[1]}
-			b := [2]float64{tt.args[2], tt.args[3]}
-			c := [2]float64{tt.args[4], tt.args[5]}
+			a := []float64{tt.args[0], tt.args[1]}
+			b := []float64{tt.args[2], tt.args[3]}
+			c := []float64{tt.args[4], tt.args[5]}
 			res := robust.Orient2d(a, b, c)
 			assert(t, tt.sign, res)
 		})
@@ -71,10 +71,10 @@ func Test_Orient3d(t *testing.T) {
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("basic: %d", i), func(t *testing.T) {
-			a := [3]float64{tt.ax, tt.ay, tt.az}
-			b := [3]float64{tt.bx, tt.by, tt.bz}
-			c := [3]float64{tt.cx, tt.cy, tt.cz}
-			d := [3]float64{tt.dx, tt.dy, tt.dz}
+			a := []float64{tt.ax, tt.ay, tt.az}
+			b := []float64{tt.bx, tt.by, tt.bz}
+			c := []float64{tt.cx, tt.cy, tt.cz}
+			d := []float64{tt.dx, tt.dy, tt.dz}
 			assert(t, tt.want, robust.Orient3d(a, b, c, d))
 		})
 	}
@@ -82,10 +82,10 @@ func Test_Orient3d(t *testing.T) {
 	fixtures := load(t, "orient.3d", 12)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
-			a := [3]float64{tt.args[0], tt.args[1], tt.args[2]}
-			b := [3]float64{tt.args[3], tt.args[4], tt.args[5]}
-			c := [3]float64{tt.args[6], tt.args[7], tt.args[8]}
-			d := [3]float64{tt.args[9], tt.args[10], tt.args[11]}
+			a := []float64{tt.args[0], tt.args[1], tt.args[2]}
+			b := []float64{tt.args[3], tt.args[4], tt.args[5]}
+			c := []float64{tt.args[6], tt.args[7], tt.args[8]}
+			d := []float64{tt.args[9], tt.args[10], tt.args[11]}
 			res := robust.Orient3d(a, b, c, d)
 			assert(t, tt.sign, res)
 		})
@@ -102,10 +102,10 @@ func Test_InCircle(t *testing.T) {
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("basic: %d", i), func(t *testing.T) {
-			a := [2]float64{tt.ax, tt.ay}
-			b := [2]float64{tt.bx, tt.by}
-			c := [2]float64{tt.cx, tt.cy}
-			d := [2]float64{tt.dx, tt.dy}
+			a := []float64{tt.ax, tt.ay}
+			b := []float64{tt.bx, tt.by}
+			c := []float64{tt.cx, tt.cy}
+			d := []float64{tt.dx, tt.dy}
 			assert(t, tt.want, robust.InCircle(a, b, c, d))
 		})
 	}
@@ -113,10 +113,10 @@ func Test_InCircle(t *testing.T) {
 	fixtures := load(t, "insphere.2d", 8)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
-			a := [2]float64{tt.args[0], tt.args[1]}
-			b := [2]float64{tt.args[2], tt.args[3]}
-			c := [2]float64{tt.args[4], tt.args[5]}
-			d := [2]float64{tt.args[6], tt.args[7]}
+			a := []float64{tt.args[0], tt.args[1]}
+			b := []float64{tt.args[2], tt.args[3]}
+			c := []float64{tt.args[4], tt.args[5]}
+			d := []float64{tt.args[6], tt.args[7]}
 			res := robust.InCircle(a, b, c, d)
 			assert(t, tt.sign, res)
 		})
@@ -133,11 +133,11 @@ func Test_InSphere(t *testing.T) {
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("basic: %d", i), func(t *testing.T) {
-			a := [3]float64{tt.ax, tt.ay, tt.az}
-			b := [3]float64{tt.bx, tt.by, tt.bz}
-			c := [3]float64{tt.cx, tt.cy, tt.cz}
-			d := [3]float64{tt.dx, tt.dy, tt.dz}
-			e := [3]float64{tt.ex, tt.ey, tt.ez}
+			a := []float64{tt.ax, tt.ay, tt.az}
+			b := []float64{tt.bx, tt.by, tt.bz}
+			c := []float64{tt.cx, tt.cy, tt.cz}
+			d := []float64{tt.dx, tt.dy, tt.dz}
+			e := []float64{tt.ex, tt.ey, tt.ez}
 			assert(t, tt.want, robust.InSphere(a, b, c, d, e))
 		})
 	}
@@ -145,11 +145,11 @@ func Test_InSphere(t *testing.T) {
 	fixtures := load(t, "insphere.3d", 15)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
-			a := [3]float64{tt.args[0], tt.args[1], tt.args[2]}
-			b := [3]float64{tt.args[3], tt.args[4], tt.args[5]}
-			c := [3]float64{tt.args[6], tt.args[7], tt.args[8]}
-			d := [3]float64{tt.args[9], tt.args[10], tt.args[11]}
-			e := [3]float64{tt.args[12], tt.args[13], tt.args[14]}
+			a := []float64{tt.args[0], tt.args[1], tt.args[2]}
+			b := []float64{tt.args[3], tt.args[4], tt.args[5]}
+			c := []float64{tt.args[6], tt.args[7], tt.args[8]}
+			d := []float64{tt.args[9], tt.args[10], tt.args[11]}
+			e := []float64{tt.args[12], tt.args[13], tt.args[14]}
 			res := robust.InSphere(a, b, c, d, e)
 			assert(t, tt.sign, res)
 		})
