@@ -1,8 +1,8 @@
 # cgo-shewchuk-robust
 
-Go bindings for [`predicates.c`](http://www.cs.cmu.edu/afs/cs/project/quake/public/code/predicates.c) from [Jonathan Shewchuk](https://people.eecs.berkeley.edu/~jrs/)
+Go bindings for the [robust geometric predicates](https://www.cs.cmu.edu/~quake/robust.html)  from [Jonathan Shewchuk](https://people.eecs.berkeley.edu/~jrs/)
 
-<https://www.cs.cmu.edu/~quake/robust.html>
+
 
 ## Tests
 
@@ -10,4 +10,4 @@ Large set of test cases from [here](https://www.cs.cmu.edu/afs/cs/project/pscico
 
 ## Licence
 
-Like the original code, this is released into the public domain.
+Like the original [`predicates.c`](http://www.cs.cmu.edu/afs/cs/project/quake/public/code/predicates.c), this is released into the public domain.
