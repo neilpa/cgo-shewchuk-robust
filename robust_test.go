@@ -1,7 +1,11 @@
 package robust_test
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 	"testing"
 
 	robust "neilpa.me/cgo-shewchuk-robust"
@@ -44,6 +48,17 @@ func Test_Orient2d(t *testing.T) {
 			assert(t, tt.want, robust.Orient2d(a, b, c))
 		})
 	}
+
+	fixtures := load(t, "orient.2d", 6)
+	for i, tt := range fixtures {
+		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
+			a := [2]float64{tt.args[0], tt.args[1]}
+			b := [2]float64{tt.args[2], tt.args[3]}
+			c := [2]float64{tt.args[4], tt.args[5]}
+			res := robust.Orient2d(a, b, c)
+			assert(t, tt.sign, res)
+		})
+	}
 }
 
 func Test_Orient3d(t *testing.T) {
@@ -63,6 +78,18 @@ func Test_Orient3d(t *testing.T) {
 			assert(t, tt.want, robust.Orient3d(a, b, c, d))
 		})
 	}
+
+	fixtures := load(t, "orient.3d", 12)
+	for i, tt := range fixtures {
+		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
+			a := [3]float64{tt.args[0], tt.args[1], tt.args[2]}
+			b := [3]float64{tt.args[3], tt.args[4], tt.args[5]}
+			c := [3]float64{tt.args[6], tt.args[7], tt.args[8]}
+			d := [3]float64{tt.args[9], tt.args[10], tt.args[11]}
+			res := robust.Orient3d(a, b, c, d)
+			assert(t, tt.sign, res)
+		})
+	}
 }
 
 func Test_InCircle(t *testing.T) {
@@ -80,6 +107,18 @@ func Test_InCircle(t *testing.T) {
 			c := [2]float64{tt.cx, tt.cy}
 			d := [2]float64{tt.dx, tt.dy}
 			assert(t, tt.want, robust.InCircle(a, b, c, d))
+		})
+	}
+
+	fixtures := load(t, "insphere.2d", 8)
+	for i, tt := range fixtures {
+		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
+			a := [2]float64{tt.args[0], tt.args[1]}
+			b := [2]float64{tt.args[2], tt.args[3]}
+			c := [2]float64{tt.args[4], tt.args[5]}
+			d := [2]float64{tt.args[6], tt.args[7]}
+			res := robust.InCircle(a, b, c, d)
+			assert(t, tt.sign, res)
 		})
 	}
 }
@@ -102,6 +141,19 @@ func Test_InSphere(t *testing.T) {
 			assert(t, tt.want, robust.InSphere(a, b, c, d, e))
 		})
 	}
+
+	fixtures := load(t, "insphere.3d", 15)
+	for i, tt := range fixtures {
+		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
+			a := [3]float64{tt.args[0], tt.args[1], tt.args[2]}
+			b := [3]float64{tt.args[3], tt.args[4], tt.args[5]}
+			c := [3]float64{tt.args[6], tt.args[7], tt.args[8]}
+			d := [3]float64{tt.args[9], tt.args[10], tt.args[11]}
+			e := [3]float64{tt.args[12], tt.args[13], tt.args[14]}
+			res := robust.InSphere(a, b, c, d, e)
+			assert(t, tt.sign, res)
+		})
+	}
 }
 
 func assert(t *testing.T, want int, got float64) {
@@ -119,4 +171,44 @@ func sign(n float64) int {
 		return 1
 	}
 	return 0
+}
+
+type testcase struct {
+	args []float64
+	sign int
+}
+
+func load(t *testing.T, path string, coords int) []testcase {
+	f, err := os.Open("test_data/" + path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	var tests []testcase
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		var tt testcase
+		parts := strings.Split(scanner.Text(), " ")
+		if len(parts) != coords+2 {
+			t.Fatalf("Coord count doens't match, got: %d want: %d", len(parts)-2, coords)
+		}
+
+		for _, field := range parts[1 : len(parts)-1] {
+			n, err := strconv.ParseFloat(field, 64)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tt.args = append(tt.args, n)
+		}
+		tt.sign, err = strconv.Atoi(parts[len(parts)-1])
+		if err != nil {
+			t.Fatal(err)
+		}
+		tests = append(tests, tt)
+	}
+	if err := scanner.Err(); err != nil {
+		t.Fatal(err)
+	}
+	return tests
 }
