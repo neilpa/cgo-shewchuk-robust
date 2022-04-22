@@ -23,6 +23,18 @@ func init() {
 	C.exactinit()
 }
 
+// XY is a "template" for 2D vector types. It's not intended for use
+// directly but as a pointer cast target. See OrientXY and InCircleXY.
+type XY struct {
+	X, Y float64
+}
+
+// XYZ is a "template" for 3D vector types. It's not intended for use
+// directly but as a pointer cast target. See OrientXYZ and InSphereXYZ.
+type XYZ struct {
+	X, Y, Z float64
+}
+
 // Orient2d returns a positive value if the points a, b, and c occur in
 // counterclockwise order; a negative value if they occur in clockwise
 // order; and zero if they are collinear. The result is also a rough
@@ -34,6 +46,16 @@ func Orient2d(a, b, c []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
+	return float64(C.orient2d(pa, pb, pc))
+}
+
+// OrientXY is the same as Orient2d but takes a pointer to a vector-2
+// like struct with fields X and Y. This exploits struct layout to avoid
+// copying values or allocating new slices.
+func OrientXY(a, b, c *XY) float64 {
+	pa := (*C.double)(&a.X)
+	pb := (*C.double)(&b.X)
+	pc := (*C.double)(&c.X)
 	return float64(C.orient2d(pa, pb, pc))
 }
 
@@ -52,6 +74,17 @@ func Orient3d(a, b, c, d []float64) float64 {
 	return float64(C.orient3d(pa, pb, pc, pd))
 }
 
+// OrientXYZ is the same as Orient3d but takes a pointer to a vector-3
+// like struct with fields X, Y, and Z. This exploits struct layout to
+// avoid copying values or allocating new slices.
+func OrientXYZ(a, b, c, d *XYZ) float64 {
+	pa := (*C.double)(&a.X)
+	pb := (*C.double)(&b.X)
+	pc := (*C.double)(&c.X)
+	pd := (*C.double)(&d.X)
+	return float64(C.orient3d(pa, pb, pc, pd))
+}
+
 // InCircle returns a positive value if the point d lies inside the
 // circle passing through a, b, and c; a negative value if it lies
 // outside; and zero if the four points are cocircular. The points
@@ -62,6 +95,17 @@ func InCircle(a, b, c, d []float64) float64 {
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
 	pd := (*C.double)(&d[0])
+	return float64(C.incircle(pa, pb, pc, pd))
+}
+
+// InCircleXY is the same as InCircle but takes a pointer to a vector-2
+// like struct with fields X and Y. This exploits struct layout to avoid
+// copying values or allocating new slices.
+func InCircleXY(a, b, c, d *XY) float64 {
+	pa := (*C.double)(&a.X)
+	pb := (*C.double)(&b.X)
+	pc := (*C.double)(&c.X)
+	pd := (*C.double)(&d.X)
 	return float64(C.incircle(pa, pb, pc, pd))
 }
 
@@ -76,6 +120,18 @@ func InSphere(a, b, c, d, e []float64) float64 {
 	pc := (*C.double)(&c[0])
 	pd := (*C.double)(&d[0])
 	pe := (*C.double)(&e[0])
+	return float64(C.insphere(pa, pb, pc, pd, pe))
+}
+
+// InSphereXYZ is the same as InSphere but takes a pointer to a vector-3
+// like struct with fields X, Y, and Z. This exploits struct layout to
+// avoid copying values or allocating new slices.
+func InSphereXYZ(a, b, c, d, e *XYZ) float64 {
+	pa := (*C.double)(&a.X)
+	pb := (*C.double)(&b.X)
+	pc := (*C.double)(&c.X)
+	pd := (*C.double)(&d.X)
+	pe := (*C.double)(&e.X)
 	return float64(C.insphere(pa, pb, pc, pd, pe))
 }
 

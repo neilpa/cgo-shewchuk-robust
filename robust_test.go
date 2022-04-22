@@ -11,6 +11,9 @@ import (
 	robust "neilpa.me/cgo-shewchuk-robust"
 )
 
+type Vec2 struct{ X, Y float64 }
+type Vec3 struct{ X, Y, Z float64 }
+
 func Test_Orient2d(t *testing.T) {
 	tests := []struct {
 		ax, ay, bx, by, cx, cy float64
@@ -57,6 +60,12 @@ func Test_Orient2d(t *testing.T) {
 			c := []float64{tt.args[4], tt.args[5]}
 			res := robust.Orient2d(a, b, c)
 			assert(t, tt.sign, res)
+
+			va := Vec2{tt.args[0], tt.args[1]}
+			vb := Vec2{tt.args[2], tt.args[3]}
+			vc := Vec2{tt.args[4], tt.args[5]}
+			res = robust.OrientXY((*robust.XY)(&va), (*robust.XY)(&vb), (*robust.XY)(&vc))
+			assert(t, tt.sign, res)
 		})
 	}
 }
@@ -88,6 +97,13 @@ func Test_Orient3d(t *testing.T) {
 			d := []float64{tt.args[9], tt.args[10], tt.args[11]}
 			res := robust.Orient3d(a, b, c, d)
 			assert(t, tt.sign, res)
+
+			va := Vec3{tt.args[0], tt.args[1], tt.args[2]}
+			vb := Vec3{tt.args[3], tt.args[4], tt.args[5]}
+			vc := Vec3{tt.args[6], tt.args[7], tt.args[8]}
+			vd := Vec3{tt.args[9], tt.args[10], tt.args[11]}
+			res = robust.OrientXYZ((*robust.XYZ)(&va), (*robust.XYZ)(&vb), (*robust.XYZ)(&vc), (*robust.XYZ)(&vd))
+			assert(t, tt.sign, res)
 		})
 	}
 }
@@ -118,6 +134,13 @@ func Test_InCircle(t *testing.T) {
 			c := []float64{tt.args[4], tt.args[5]}
 			d := []float64{tt.args[6], tt.args[7]}
 			res := robust.InCircle(a, b, c, d)
+			assert(t, tt.sign, res)
+
+			va := Vec2{tt.args[0], tt.args[1]}
+			vb := Vec2{tt.args[2], tt.args[3]}
+			vc := Vec2{tt.args[4], tt.args[5]}
+			vd := Vec2{tt.args[6], tt.args[7]}
+			res = robust.InCircleXY((*robust.XY)(&va), (*robust.XY)(&vb), (*robust.XY)(&vc), (*robust.XY)(&vd))
 			assert(t, tt.sign, res)
 		})
 	}
@@ -151,6 +174,14 @@ func Test_InSphere(t *testing.T) {
 			d := []float64{tt.args[9], tt.args[10], tt.args[11]}
 			e := []float64{tt.args[12], tt.args[13], tt.args[14]}
 			res := robust.InSphere(a, b, c, d, e)
+			assert(t, tt.sign, res)
+
+			va := Vec3{tt.args[0], tt.args[1], tt.args[2]}
+			vb := Vec3{tt.args[3], tt.args[4], tt.args[5]}
+			vc := Vec3{tt.args[6], tt.args[7], tt.args[8]}
+			vd := Vec3{tt.args[9], tt.args[10], tt.args[11]}
+			ve := Vec3{tt.args[12], tt.args[13], tt.args[14]}
+			res = robust.InSphereXYZ((*robust.XYZ)(&va), (*robust.XYZ)(&vb), (*robust.XYZ)(&vc), (*robust.XYZ)(&vd), (*robust.XYZ)(&ve))
 			assert(t, tt.sign, res)
 		})
 	}
