@@ -2,41 +2,31 @@
 // Jonathan Shewchuk. Only the primary adaptive functions are exported from
 // this package.
 //
-// There are two variants of each core function. One with `[]float64` arguments
-// that represent 2D or 3D points and require at least that many elements. The
-// other use a "template" pointer to struct point-like argument. This package
-// contains `XY` and `XYZ` definitions of these that can be used as cast targets
-// for similarly defined point structs.
+// Each of the core functions takes `*float64` arguments that should be
+// C-like arrays of at least 2 or 3 values for the respective dimensionality.
+// For use with slice types or flat buffers of point values, take the address
+// of the x-coordinate of the target index, e.g.
 //
-// TODO: A third variant taking `*float` arguments which could cover both above
-// cases when numbers are layed out in memory as the C code expects.
+// 	res := robust.Orient2D(&buf[i], &buf[i+2], &buf[i+4])
+//
+// Alternatively, if you have point-like struct types with X, Y or X, Y, Z
+// coordinates, use the address of the X field, e.g.
+//
+//	res := robust.Orient2D(&p0.X, &p1.X, &p2.X)
+//
+// There are also `s` suffixed convenience functions taking `[]float64`
+// arguments that use the first element as the X coordinate.
 package robust
 
 // void exactinit();
 // double orient2d(double *pa, double *pb, double *pc);
-// double orient2dfast(double *pa, double *pb, double *pc);
 // double orient3d(double *pa, double *pb, double *pc, double *pd);
-// double orient3dfast(double *pa, double *pb, double *pc, double *pd);
 // double incircle(double *pa, double *pb, double *pc, double *pd);
-// double incirclefast(double *pa, double *pb, double *pc, double *pd);
 // double insphere(double *pa, double *pb, double *pc, double *pd, double *pe);
-// double inspherefast(double *pa, double *pb, double *pc, double *pd, double *pe);
 import "C"
 
 func init() {
 	C.exactinit()
-}
-
-// XY is a "template" for 2D vector types. It's not intended for use
-// directly but as a pointer cast target. See OrientXY and InCircleXY.
-type XY struct {
-	X, Y float64
-}
-
-// XYZ is a "template" for 3D vector types. It's not intended for use
-// directly but as a pointer cast target. See OrientXYZ and InSphereXYZ.
-type XYZ struct {
-	X, Y, Z float64
 }
 
 // Orient2D returns a positive value if the points a, b, and c occur in
@@ -45,21 +35,20 @@ type XYZ struct {
 // approximation of twice the signed area of the triangle defined by the
 // three points.
 //
-// Each point slice must be at least 2 elements long
-func Orient2D(a, b, c []float64) float64 {
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
+// Each pointer must at least 2 contiguous values.
+func Orient2D(a, b, c *float64) float64 {
+	pa := (*C.double)(a)
+	pb := (*C.double)(b)
+	pc := (*C.double)(c)
 	return float64(C.orient2d(pa, pb, pc))
 }
 
-// OrientXY is the same as Orient2D but takes a pointer to a vector-2
-// like struct with fields X and Y. This exploits struct layout to avoid
-// copying values or allocating new slices.
-func OrientXY(a, b, c *XY) float64 {
-	pa := (*C.double)(&a.X)
-	pb := (*C.double)(&b.X)
-	pc := (*C.double)(&c.X)
+// Orient2Ds is a convenience wrapper for Orient2D. Each slice must
+// be at least 2 elements long, additional elements are ignored.
+func Orient2Ds(a, b, c []float64) float64 {
+	pa := (*C.double)(&a[0])
+	pb := (*C.double)(&b[0])
+	pc := (*C.double)(&c[0])
 	return float64(C.orient2d(pa, pb, pc))
 }
 
@@ -70,22 +59,21 @@ func OrientXY(a, b, c *XY) float64 {
 // zero if the points are coplanar. The result is also a rough
 // approximation of six times the signed volume of the tetrahedron
 // defined by the four points.
-func Orient3D(a, b, c, d []float64) float64 {
+func Orient3D(a, b, c, d *float64) float64 {
+	pa := (*C.double)(a)
+	pb := (*C.double)(b)
+	pc := (*C.double)(c)
+	pd := (*C.double)(d)
+	return float64(C.orient3d(pa, pb, pc, pd))
+}
+
+// Orient3Ds is a convenience wrapper for Orient3D. Each slice must
+// be at least 3 elements long, additional elements are ignored.
+func Orient3Ds(a, b, c, d []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
 	pd := (*C.double)(&d[0])
-	return float64(C.orient3d(pa, pb, pc, pd))
-}
-
-// OrientXYZ is the same as Orient3D but takes a pointer to a vector-3
-// like struct with fields X, Y, and Z. This exploits struct layout to
-// avoid copying values or allocating new slices.
-func OrientXYZ(a, b, c, d *XYZ) float64 {
-	pa := (*C.double)(&a.X)
-	pb := (*C.double)(&b.X)
-	pc := (*C.double)(&c.X)
-	pd := (*C.double)(&d.X)
 	return float64(C.orient3d(pa, pb, pc, pd))
 }
 
@@ -94,22 +82,21 @@ func OrientXYZ(a, b, c, d *XYZ) float64 {
 // outside; and zero if the four points are cocircular. The points
 // a, b, and c must be in counterclockwise order, or the sign of the
 // result will be reversed.
-func InCircle2D(a, b, c, d []float64) float64 {
+func InCircle2D(a, b, c, d *float64) float64 {
+	pa := (*C.double)(a)
+	pb := (*C.double)(b)
+	pc := (*C.double)(c)
+	pd := (*C.double)(d)
+	return float64(C.incircle(pa, pb, pc, pd))
+}
+
+// InCircle2Ds is a convenience wrapper for InCircle2D. Each slice must
+// be at least 2 elements long, additional elements are ignored.
+func InCircle2Ds(a, b, c, d []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
 	pd := (*C.double)(&d[0])
-	return float64(C.incircle(pa, pb, pc, pd))
-}
-
-// InCircleXY is the same as InCircle but takes a pointer to a vector-2
-// like struct with fields X and Y. This exploits struct layout to avoid
-// copying values or allocating new slices.
-func InCircleXY(a, b, c, d *XY) float64 {
-	pa := (*C.double)(&a.X)
-	pb := (*C.double)(&b.X)
-	pc := (*C.double)(&c.X)
-	pd := (*C.double)(&d.X)
 	return float64(C.incircle(pa, pb, pc, pd))
 }
 
@@ -118,62 +105,22 @@ func InCircleXY(a, b, c, d *XY) float64 {
 // outside; and zero if the five points are cospherical. The points a,
 // b, c, and d must be ordered so that they have a positive orientation
 // (as defined by orient3d()), or the sign of the result will be reversed.
-func InSphere3D(a, b, c, d, e []float64) float64 {
+func InSphere3D(a, b, c, d, e *float64) float64 {
+	pa := (*C.double)(a)
+	pb := (*C.double)(b)
+	pc := (*C.double)(c)
+	pd := (*C.double)(d)
+	pe := (*C.double)(e)
+	return float64(C.insphere(pa, pb, pc, pd, pe))
+}
+
+// InSphere3Ds is a convenience wrapper for InSphere3D. Each slice must
+// be at least 3 elements long, additional elements are ignored.
+func InSphere3Ds(a, b, c, d, e []float64) float64 {
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
 	pd := (*C.double)(&d[0])
 	pe := (*C.double)(&e[0])
 	return float64(C.insphere(pa, pb, pc, pd, pe))
-}
-
-// InSphereXYZ is the same as InSphere but takes a pointer to a vector-3
-// like struct with fields X, Y, and Z. This exploits struct layout to
-// avoid copying values or allocating new slices.
-func InSphereXYZ(a, b, c, d, e *XYZ) float64 {
-	pa := (*C.double)(&a.X)
-	pb := (*C.double)(&b.X)
-	pc := (*C.double)(&c.X)
-	pd := (*C.double)(&d.X)
-	pe := (*C.double)(&e.X)
-	return float64(C.insphere(pa, pb, pc, pd, pe))
-}
-
-// The following "Fast" algorithms are non-robust. They've been included
-// to check against the robust variants but should be avoided otherwise.
-
-// Orient2dFast is the naive, non-robust orient2d check.
-func Orient2dFast(a, b, c []float64) float64 {
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
-	return float64(C.orient2dfast(pa, pb, pc))
-}
-
-// Orient3dFast is the naive, non-robust orient3d check.
-func Orient3dFast(a, b, c, d []float64) float64 {
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
-	pd := (*C.double)(&d[0])
-	return float64(C.orient3dfast(pa, pb, pc, pd))
-}
-
-// InCircle2DFast is the naive, non-robust incircle check.
-func InCircle2DFast(a, b, c, d []float64) float64 {
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
-	pd := (*C.double)(&d[0])
-	return float64(C.incirclefast(pa, pb, pc, pd))
-}
-
-// InSphere3DFast is the naive, non-robust insphere check.
-func InSphere3DFast(a, b, c, d, e []float64) float64 {
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
-	pd := (*C.double)(&d[0])
-	pe := (*C.double)(&e[0])
-	return float64(C.inspherefast(pa, pb, pc, pd, pe))
 }
