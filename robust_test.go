@@ -50,6 +50,7 @@ func Test_Orient2d(t *testing.T) {
 			a := []float64{tt.ax, tt.ay}
 			b := []float64{tt.bx, tt.by}
 			c := []float64{tt.cx, tt.cy}
+			assert(t, tt.want, robust.Orient2Ds(a, b, c))
 			assert(t, tt.want, robust.Orient2D(&a[0], &b[0], &c[0]))
 		})
 	}

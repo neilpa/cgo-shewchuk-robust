@@ -7,7 +7,7 @@
 // For use with slice types or flat buffers of point values, take the address
 // of the x-coordinate of the target index, e.g.
 //
-// 	res := robust.Orient2D(&buf[i], &buf[i+2], &buf[i+4])
+//	res := robust.Orient2D(&buf[i], &buf[i+2], &buf[i+4])
 //
 // Alternatively, if you have point-like struct types with X, Y or X, Y, Z
 // coordinates, use the address of the X field, e.g.
@@ -19,7 +19,9 @@
 package robust
 
 // void exactinit();
+// extern double ccwerrboundA;
 // double orient2d(double *pa, double *pb, double *pc);
+// double orient2dadapt(double *pa, double *pb, double *pc, double detsum);
 // double orient3d(double *pa, double *pb, double *pc, double *pd);
 // double incircle(double *pa, double *pb, double *pc, double *pd);
 // double insphere(double *pa, double *pb, double *pc, double *pd, double *pe);
@@ -46,10 +48,38 @@ func Orient2D(a, b, c *float64) float64 {
 // Orient2Ds is a convenience wrapper for Orient2D. Each slice must
 // be at least 2 elements long, additional elements are ignored.
 func Orient2Ds(a, b, c []float64) float64 {
+	var detleft, detright, det float64
+	var detsum float64
+
+	detleft = (a[0] - c[0]) * (b[1] - c[1])
+	detright = (a[1] - c[1]) * (b[0] - c[0])
+	det = detleft - detright
+
+	if detleft > 0.0 {
+		if detright <= 0.0 {
+			return det
+		} else {
+			detsum = detleft + detright
+		}
+	} else if detleft < 0.0 {
+		if detright >= 0.0 {
+			return det
+		} else {
+			detsum = -detleft - detright
+		}
+	} else {
+		return det
+	}
+
+	errbound := float64(C.ccwerrboundA) * detsum
+	if (det >= errbound) || (-det >= errbound) {
+		return det
+	}
+
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
-	return float64(C.orient2d(pa, pb, pc))
+	return float64(C.orient2dadapt(pa, pb, pc, C.double(detsum)))
 }
 
 // Orient3D returns a positive value if the point pd lies below the
