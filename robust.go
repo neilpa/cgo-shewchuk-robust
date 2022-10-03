@@ -27,8 +27,14 @@ package robust
 // double insphere(double *pa, double *pb, double *pc, double *pd, double *pe);
 import "C"
 
+// Cache values from CGO init
+var (
+	ccwerrboundA float64
+)
+
 func init() {
 	C.exactinit()
+	ccwerrboundA = float64(C.ccwerrboundA)
 }
 
 // Orient2D returns a positive value if the points a, b, and c occur in
@@ -71,7 +77,7 @@ func Orient2Ds(a, b, c []float64) float64 {
 		return det
 	}
 
-	errbound := float64(C.ccwerrboundA) * detsum
+	errbound := ccwerrboundA * detsum
 	if (det >= errbound) || (-det >= errbound) {
 		return det
 	}
