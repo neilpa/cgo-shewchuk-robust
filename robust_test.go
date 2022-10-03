@@ -14,6 +14,8 @@ import (
 type Vec2 struct{ X, Y float64 }
 type Vec3 struct{ X, Y, Z float64 }
 
+var result float64 // benchmark results
+
 func Test_Orient2d(t *testing.T) {
 	tests := []struct {
 		ax, ay, bx, by, cx, cy float64
@@ -68,6 +70,38 @@ func Test_Orient2d(t *testing.T) {
 			assert(t, tt.sign, res)
 		})
 	}
+}
+
+func Benchmark_Orient2D(b *testing.B) {
+	fixtures := load(b, "orient.2d", 6)
+	b.ResetTimer()
+
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, tt := range fixtures {
+			va := Vec2{tt.args[0], tt.args[1]}
+			vb := Vec2{tt.args[2], tt.args[3]}
+			vc := Vec2{tt.args[4], tt.args[5]}
+			res = robust.Orient2D(&va.X, &vb.X, &vc.X)
+		}
+	}
+	result = res
+}
+
+func Benchmark_Orient2Ds(b *testing.B) {
+	fixtures := load(b, "orient.2d", 6)
+	b.ResetTimer()
+
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, tt := range fixtures {
+			a := []float64{tt.args[0], tt.args[1]}
+			b := []float64{tt.args[2], tt.args[3]}
+			c := []float64{tt.args[4], tt.args[5]}
+			res = robust.Orient2Ds(a, b, c)
+		}
+	}
+	result = res
 }
 
 func Test_Orient3d(t *testing.T) {
@@ -209,7 +243,7 @@ type testcase struct {
 	sign int
 }
 
-func load(t *testing.T, path string, coords int) []testcase {
+func load(t testing.TB, path string, coords int) []testcase {
 	f, err := os.Open("test_data/" + path)
 	if err != nil {
 		t.Fatal(err)
