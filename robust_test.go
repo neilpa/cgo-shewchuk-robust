@@ -176,6 +176,50 @@ func Test_Orient3d(t *testing.T) {
 	}
 }
 
+func Benchmark_Orient3D_Ptr(b *testing.B) {
+	fixtures := load(b, "orient.3d", 12)
+
+	tests := make([][4]*float64, len(fixtures))
+	for i, tt := range fixtures {
+		va := Vec3{tt.args[0], tt.args[1], tt.args[2]}
+		vb := Vec3{tt.args[3], tt.args[4], tt.args[5]}
+		vc := Vec3{tt.args[6], tt.args[7], tt.args[8]}
+		vd := Vec3{tt.args[9], tt.args[10], tt.args[11]}
+		tests[i] = [4]*float64{&va.X, &vb.X, &vc.X, &vd.X}
+	}
+
+	b.ResetTimer()
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, ptrs := range tests {
+			res = robust.Orient3D(ptrs[0], ptrs[1], ptrs[2], ptrs[3])
+		}
+	}
+	result = res
+}
+
+func Benchmark_Orient3D_Slice(b *testing.B) {
+	fixtures := load(b, "orient.3d", 12)
+	tests := make([][4][]float64, len(fixtures))
+	for i, tt := range fixtures {
+		tests[i] = [4][]float64{
+			{tt.args[0], tt.args[1], tt.args[2]},
+			{tt.args[3], tt.args[4], tt.args[5]},
+			{tt.args[6], tt.args[7], tt.args[8]},
+			{tt.args[9], tt.args[10], tt.args[11]},
+		}
+	}
+
+	b.ResetTimer()
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, arr := range tests {
+			res = robust.Orient3Ds(arr[0], arr[1], arr[2], arr[3])
+		}
+	}
+	result = res
+}
+
 func Test_InCircle(t *testing.T) {
 	tests := []struct {
 		ax, ay, bx, by, cx, cy, dx, dy float64
@@ -212,6 +256,50 @@ func Test_InCircle(t *testing.T) {
 			assert(t, tt.sign, res)
 		})
 	}
+}
+
+func Benchmark_InCircle_Ptr(b *testing.B) {
+	fixtures := load(b, "insphere.2d", 8)
+
+	tests := make([][4]*float64, len(fixtures))
+	for i, tt := range fixtures {
+		va := Vec2{tt.args[0], tt.args[1]}
+		vb := Vec2{tt.args[2], tt.args[3]}
+		vc := Vec2{tt.args[4], tt.args[5]}
+		vd := Vec2{tt.args[6], tt.args[7]}
+		tests[i] = [4]*float64{&va.X, &vb.X, &vc.X, &vd.X}
+	}
+
+	b.ResetTimer()
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, ptrs := range tests {
+			res = robust.InCircle2D(ptrs[0], ptrs[1], ptrs[2], ptrs[3])
+		}
+	}
+	result = res
+}
+
+func Benchmark_InCircle_Slice(b *testing.B) {
+	fixtures := load(b, "insphere.2d", 8)
+
+	tests := make([][4][]float64, len(fixtures))
+	for i, tt := range fixtures {
+		va := []float64{tt.args[0], tt.args[1]}
+		vb := []float64{tt.args[2], tt.args[3]}
+		vc := []float64{tt.args[4], tt.args[5]}
+		vd := []float64{tt.args[6], tt.args[7]}
+		tests[i] = [4][]float64{va, vb, vc, vd}
+	}
+
+	b.ResetTimer()
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, ptrs := range tests {
+			res = robust.InCircle2Ds(ptrs[0], ptrs[1], ptrs[2], ptrs[3])
+		}
+	}
+	result = res
 }
 
 func Test_InSphere(t *testing.T) {
@@ -253,6 +341,52 @@ func Test_InSphere(t *testing.T) {
 			assert(t, tt.sign, res)
 		})
 	}
+}
+
+func Benchmark_InSphere_Ptr(b *testing.B) {
+	fixtures := load(b, "insphere.3d", 15)
+
+	tests := make([][5]*float64, len(fixtures))
+	for i, tt := range fixtures {
+		va := Vec3{tt.args[0], tt.args[1], tt.args[2]}
+		vb := Vec3{tt.args[3], tt.args[4], tt.args[5]}
+		vc := Vec3{tt.args[6], tt.args[7], tt.args[8]}
+		vd := Vec3{tt.args[9], tt.args[10], tt.args[11]}
+		ve := Vec3{tt.args[12], tt.args[13], tt.args[14]}
+		tests[i] = [5]*float64{&va.X, &vb.X, &vc.X, &vd.X, &ve.X}
+	}
+
+	b.ResetTimer()
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, ptrs := range tests {
+			res = robust.InSphere3D(ptrs[0], ptrs[1], ptrs[2], ptrs[3], ptrs[4])
+		}
+	}
+	result = res
+}
+
+func Benchmark_InSphere_Slice(b *testing.B) {
+	fixtures := load(b, "insphere.3d", 15)
+
+	tests := make([][5][]float64, len(fixtures))
+	for i, tt := range fixtures {
+		a := []float64{tt.args[0], tt.args[1], tt.args[2]}
+		b := []float64{tt.args[3], tt.args[4], tt.args[5]}
+		c := []float64{tt.args[6], tt.args[7], tt.args[8]}
+		d := []float64{tt.args[9], tt.args[10], tt.args[11]}
+		e := []float64{tt.args[12], tt.args[13], tt.args[14]}
+		tests[i] = [5][]float64{a, b, c, d, e}
+	}
+
+	b.ResetTimer()
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, arrs := range tests {
+			res = robust.InSphere3Ds(arrs[0], arrs[1], arrs[2], arrs[3], arrs[4])
+		}
+	}
+	result = res
 }
 
 func assert(t *testing.T, want int, got float64) {
