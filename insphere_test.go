@@ -26,7 +26,7 @@ func Test_InSphere(t *testing.T) {
 		})
 	}
 
-	fixtures := load(t, "insphere.3d", 15)
+	fixtures := load(t, "insphere3d.txt", 15)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
 			a := []float64{tt.args[0], tt.args[1], tt.args[2]}
@@ -49,7 +49,7 @@ func Test_InSphere(t *testing.T) {
 }
 
 func Benchmark_InSphere_Ptr(b *testing.B) {
-	fixtures := load(b, "insphere.3d", 15)
+	fixtures := load(b, "insphere3d.txt", 15)
 
 	tests := make([][5]*float64, len(fixtures))
 	for i, tt := range fixtures {
@@ -72,7 +72,7 @@ func Benchmark_InSphere_Ptr(b *testing.B) {
 }
 
 func Benchmark_InSphere_Slice(b *testing.B) {
-	fixtures := load(b, "insphere.3d", 15)
+	fixtures := load(b, "insphere3d.txt", 15)
 
 	tests := make([][5][]float64, len(fixtures))
 	for i, tt := range fixtures {
