@@ -1,3 +1,3 @@
 module neilpa.me/cgo-shewchuk-robust
 
-go 1.9
+go 1.11
