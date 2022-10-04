@@ -22,6 +22,7 @@ func Test_InSphere(t *testing.T) {
 			c := []float64{tt.cx, tt.cy, tt.cz}
 			d := []float64{tt.dx, tt.dy, tt.dz}
 			e := []float64{tt.ex, tt.ey, tt.ez}
+			assert(t, tt.want, robust.InSphere3D(&a[0], &b[0], &c[0], &d[0], &e[0]))
 			assert(t, tt.want, robust.InSphere3Ds(a, b, c, d, e))
 		})
 	}
