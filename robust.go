@@ -19,25 +19,27 @@
 package robust
 
 // void exactinit();
-// extern double ccwerrboundA, o3derrboundA;
+// extern double ccwerrboundA, o3derrboundA, iccerrboundA;
 // double orient2d(double *pa, double *pb, double *pc);
 // double orient2dadapt(double *pa, double *pb, double *pc, double detsum);
 // double orient3d(double *pa, double *pb, double *pc, double *pd);
 // double orient3dadapt(double *pa, double *pb, double *pc, double *pd, double permanent);
 // double incircle(double *pa, double *pb, double *pc, double *pd);
+// double incircleadapt(double *pa, double *pb, double *pc, double *pd, double permanent);
 // double insphere(double *pa, double *pb, double *pc, double *pd, double *pe);
 import "C"
 import "math"
 
 // Cache values from CGO init
 var (
-	ccwerrboundA, o3derrboundA float64
+	ccwerrboundA, o3derrboundA, iccerrboundA float64
 )
 
 func init() {
 	C.exactinit()
 	ccwerrboundA = float64(C.ccwerrboundA)
 	o3derrboundA = float64(C.o3derrboundA)
+	iccerrboundA = float64(C.iccerrboundA)
 }
 
 // Orient2D returns a positive value if the points a, b, and c occur in
@@ -171,11 +173,51 @@ func InCircle2D(a, b, c, d *float64) float64 {
 // InCircle2Ds is a convenience wrapper for InCircle2D. Each slice must
 // be at least 2 elements long, additional elements are ignored.
 func InCircle2Ds(a, b, c, d []float64) float64 {
+	var adx, bdx, cdx, ady, bdy, cdy float64
+	var bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady float64
+	var alift, blift, clift float64
+	var det float64
+	var permanent, errbound float64
+
+	adx = a[0] - d[0]
+	bdx = b[0] - d[0]
+	cdx = c[0] - d[0]
+	ady = a[1] - d[1]
+	bdy = b[1] - d[1]
+	cdy = c[1] - d[1]
+
+	bdxcdy = bdx * cdy
+	cdxbdy = cdx * bdy
+	alift = adx*adx + ady*ady
+
+	cdxady = cdx * ady
+	adxcdy = adx * cdy
+	blift = bdx*bdx + bdy*bdy
+
+	adxbdy = adx * bdy
+	bdxady = bdx * ady
+	clift = cdx*cdx + cdy*cdy
+
+	det =
+		alift*(bdxcdy-cdxbdy) +
+			blift*(cdxady-adxcdy) +
+			clift*(adxbdy-bdxady)
+
+	permanent =
+		(math.Abs(bdxcdy)+math.Abs(cdxbdy))*alift +
+			(math.Abs(cdxady)+math.Abs(adxcdy))*blift +
+			(math.Abs(adxbdy)+math.Abs(bdxady))*clift
+
+	errbound = iccerrboundA * permanent
+	if (det > errbound) || (-det > errbound) {
+		return det
+	}
+
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
 	pd := (*C.double)(&d[0])
-	return float64(C.incircle(pa, pb, pc, pd))
+	return float64(C.incircleadapt(pa, pb, pc, pd, C.double(permanent)))
 }
 
 // InSphere3D returns a positive value if the point e lies inside the
