@@ -67,9 +67,9 @@ func Test_Orient2d(t *testing.T) {
 func Benchmark_Orient2D_Vec2(b *testing.B) {
 	fixtures := load(b, "orient2d.txt", 6)
 
-	tests := make([][3]Vec2, len(fixtures))
+	tests := make([][3]*Vec2, len(fixtures))
 	for i, tt := range fixtures {
-		tests[i] = [3]Vec2{
+		tests[i] = [3]*Vec2{
 			{tt.args[0], tt.args[1]},
 			{tt.args[2], tt.args[3]},
 			{tt.args[4], tt.args[5]},
@@ -81,7 +81,7 @@ func Benchmark_Orient2D_Vec2(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		for _, vecs := range tests {
 			va, vb, vc := vecs[0], vecs[1], vecs[2]
-			res = robust.Orient2D(&va.X, &vb.X, &vc.X)
+			res = robust.Orient2Vec((*robust.XY)(va), (*robust.XY)(vb), (*robust.XY)(vc))
 		}
 	}
 	result = res
