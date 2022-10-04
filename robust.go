@@ -19,22 +19,25 @@
 package robust
 
 // void exactinit();
-// extern double ccwerrboundA;
+// extern double ccwerrboundA, o3derrboundA;
 // double orient2d(double *pa, double *pb, double *pc);
 // double orient2dadapt(double *pa, double *pb, double *pc, double detsum);
 // double orient3d(double *pa, double *pb, double *pc, double *pd);
+// double orient3dadapt(double *pa, double *pb, double *pc, double *pd, double permanent);
 // double incircle(double *pa, double *pb, double *pc, double *pd);
 // double insphere(double *pa, double *pb, double *pc, double *pd, double *pe);
 import "C"
+import "math"
 
 // Cache values from CGO init
 var (
-	ccwerrboundA float64
+	ccwerrboundA, o3derrboundA float64
 )
 
 func init() {
 	C.exactinit()
 	ccwerrboundA = float64(C.ccwerrboundA)
+	o3derrboundA = float64(C.o3derrboundA)
 }
 
 // Orient2D returns a positive value if the points a, b, and c occur in
@@ -106,11 +109,50 @@ func Orient3D(a, b, c, d *float64) float64 {
 // Orient3Ds is a convenience wrapper for Orient3D. Each slice must
 // be at least 3 elements long, additional elements are ignored.
 func Orient3Ds(a, b, c, d []float64) float64 {
+	var adx, bdx, cdx, ady, bdy, cdy, adz, bdz, cdz float64
+	var bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady float64
+	var det float64
+	var permanent, errbound float64
+
+	adx = a[0] - d[0]
+	bdx = b[0] - d[0]
+	cdx = c[0] - d[0]
+	ady = a[1] - d[1]
+	bdy = b[1] - d[1]
+	cdy = c[1] - d[1]
+	adz = a[2] - d[2]
+	bdz = b[2] - d[2]
+	cdz = c[2] - d[2]
+
+	bdxcdy = bdx * cdy
+	cdxbdy = cdx * bdy
+
+	cdxady = cdx * ady
+	adxcdy = adx * cdy
+
+	adxbdy = adx * bdy
+	bdxady = bdx * ady
+
+	det =
+		adz*(bdxcdy-cdxbdy) +
+			bdz*(cdxady-adxcdy) +
+			cdz*(adxbdy-bdxady)
+
+	permanent =
+		(math.Abs(bdxcdy)+math.Abs(cdxbdy))*math.Abs(adz) +
+			(math.Abs(cdxady)+math.Abs(adxcdy))*math.Abs(bdz) +
+			(math.Abs(adxbdy)+math.Abs(bdxady))*math.Abs(cdz)
+
+	errbound = o3derrboundA * permanent
+	if (det > errbound) || (-det > errbound) {
+		return det
+	}
+
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
 	pd := (*C.double)(&d[0])
-	return float64(C.orient3d(pa, pb, pc, pd))
+	return float64(C.orient3dadapt(pa, pb, pc, pd, C.double(permanent)))
 }
 
 // InCircle2D returns a positive value if the point d lies inside the
