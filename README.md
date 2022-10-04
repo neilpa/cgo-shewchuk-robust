@@ -1,7 +1,9 @@
 # cgo-shewchuk-robust
 
-Go bindings for the [robust geometric predicates](https://www.cs.cmu.edu/~quake/robust.html)  from [Jonathan Shewchuk](https://people.eecs.berkeley.edu/~jrs/)
+[![CI](https://github.com/neilpa/cgo-shewchuk-robust/workflows/Test/badge.svg)](https://github.com/neilpa/cgo-shewchuk-robust/actions)
+[![GoDoc](https://godoc.org/neilpa.me/cgo-shewchuk-robust?status.svg)](https://godoc.org/neilpa.me/cgo-shewchuk-robust)
 
+Go bindings for the [robust geometric predicates](https://www.cs.cmu.edu/~quake/robust.html)  from [Jonathan Shewchuk](https://people.eecs.berkeley.edu/~jrs/)
 
 
 ## Tests
