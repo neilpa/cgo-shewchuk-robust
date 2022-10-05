@@ -12,38 +12,13 @@ import "C"
 //
 // Each slice parameter must contain at least 2 values.
 func Orient2(a, b, c []float64) float64 {
-	var detleft, detright, det float64
-	var detsum float64
-
-	detleft = (a[0] - c[0]) * (b[1] - c[1])
-	detright = (a[1] - c[1]) * (b[0] - c[0])
-	det = detleft - detright
-
-	if detleft > 0.0 {
-		if detright <= 0.0 {
-			return det
-		} else {
-			detsum = detleft + detright
-		}
-	} else if detleft < 0.0 {
-		if detright >= 0.0 {
-			return det
-		} else {
-			detsum = -detleft - detright
-		}
-	} else {
-		return det
-	}
-
-	errbound := ccwerrboundA * detsum
-	if (det >= errbound) || (-det >= errbound) {
-		return det
-	}
-
+	detleft := (a[0] - c[0]) * (b[1] - c[1])
+	detright := (a[1] - c[1]) * (b[0] - c[0])
 	pa := (*C.double)(&a[0])
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
-	return float64(C.orient2dadapt(pa, pb, pc, C.double(detsum)))
+
+	return orient2(pa, pb, pc, detleft, detright)
 }
 
 // Orient2Vec is similiar to `Orient2` but takes a point-like struct
