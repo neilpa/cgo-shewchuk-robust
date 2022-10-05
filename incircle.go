@@ -17,9 +17,11 @@ func InCircle(a, b, c, d []float64) float64 {
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
 	pd := (*C.double)(&d[0])
+
 	return inCircle(pa, pb, pc, pd,
 		a[0]-d[0], b[0]-d[0], c[0]-d[0],
-		a[1]-d[1], b[1]-d[1], c[1]-d[1])
+		a[1]-d[1], b[1]-d[1], c[1]-d[1],
+	)
 }
 
 // InCircleVec is similiar to `InCircle` but takes a point-like struct
@@ -29,9 +31,11 @@ func InCircleVec(a, b, c, d *XY) float64 {
 	pb := (*C.double)(&b.X)
 	pc := (*C.double)(&c.X)
 	pd := (*C.double)(&d.X)
+
 	return inCircle(pa, pb, pc, pd,
 		a.X-d.X, b.X-d.X, c.X-d.X,
-		a.Y-d.Y, b.Y-d.Y, c.Y-d.Y)
+		a.Y-d.Y, b.Y-d.Y, c.Y-d.Y,
+	)
 }
 
 // InCirclePtr is the direct wrapper of `incircle` from `predicates.c`.
@@ -47,36 +51,32 @@ func InCirclePtr(a, b, c, d *float64) float64 {
 // inCircle implements the basic error bound checks to minimize
 // CGO calls to the adaptive implementation.
 func inCircle(pa, pb, pc, pd *C.double,
-	adx, bdx, cdx, ady, bdy, cdy float64) float64 {
+	adx, bdx, cdx, ady, bdy, cdy float64,
+) float64 {
 
-	var bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady float64
-	var alift, blift, clift float64
-	var det float64
-	var permanent, errbound float64
+	bdxcdy := bdx * cdy
+	cdxbdy := cdx * bdy
+	alift := adx*adx + ady*ady
 
-	bdxcdy = bdx * cdy
-	cdxbdy = cdx * bdy
-	alift = adx*adx + ady*ady
+	cdxady := cdx * ady
+	adxcdy := adx * cdy
+	blift := bdx*bdx + bdy*bdy
 
-	cdxady = cdx * ady
-	adxcdy = adx * cdy
-	blift = bdx*bdx + bdy*bdy
+	adxbdy := adx * bdy
+	bdxady := bdx * ady
+	clift := cdx*cdx + cdy*cdy
 
-	adxbdy = adx * bdy
-	bdxady = bdx * ady
-	clift = cdx*cdx + cdy*cdy
-
-	det =
+	det :=
 		alift*(bdxcdy-cdxbdy) +
 			blift*(cdxady-adxcdy) +
 			clift*(adxbdy-bdxady)
 
-	permanent =
+	permanent :=
 		(math.Abs(bdxcdy)+math.Abs(cdxbdy))*alift +
 			(math.Abs(cdxady)+math.Abs(adxcdy))*blift +
 			(math.Abs(adxbdy)+math.Abs(bdxady))*clift
 
-	errbound = iccerrboundA * permanent
+	errbound := iccerrboundA * permanent
 	if (det > errbound) || (-det > errbound) {
 		return det
 	}

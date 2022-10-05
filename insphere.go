@@ -61,67 +61,55 @@ func inSphere(pa, pb, pc, pd, pe *C.double,
 	aez, bez, cez, dez float64,
 ) float64 {
 
-	var aexbey, bexaey, bexcey, cexbey, cexdey, dexcey, dexaey, aexdey float64
-	var aexcey, cexaey, bexdey, dexbey float64
-	var alift, blift, clift, dlift float64
-	var ab, bc, cd, da, ac, bd float64
-	var abc, bcd, cda, dab float64
-	var aezplus, bezplus, cezplus, dezplus float64
-	var aexbeyplus, bexaeyplus, bexceyplus, cexbeyplus float64
-	var cexdeyplus, dexceyplus, dexaeyplus, aexdeyplus float64
-	var aexceyplus, cexaeyplus, bexdeyplus, dexbeyplus float64
-	var det float64
-	var permanent, errbound float64
+	aexbey := aex * bey
+	bexaey := bex * aey
+	ab := aexbey - bexaey
+	bexcey := bex * cey
+	cexbey := cex * bey
+	bc := bexcey - cexbey
+	cexdey := cex * dey
+	dexcey := dex * cey
+	cd := cexdey - dexcey
+	dexaey := dex * aey
+	aexdey := aex * dey
+	da := dexaey - aexdey
 
-	aexbey = aex * bey
-	bexaey = bex * aey
-	ab = aexbey - bexaey
-	bexcey = bex * cey
-	cexbey = cex * bey
-	bc = bexcey - cexbey
-	cexdey = cex * dey
-	dexcey = dex * cey
-	cd = cexdey - dexcey
-	dexaey = dex * aey
-	aexdey = aex * dey
-	da = dexaey - aexdey
+	aexcey := aex * cey
+	cexaey := cex * aey
+	ac := aexcey - cexaey
+	bexdey := bex * dey
+	dexbey := dex * bey
+	bd := bexdey - dexbey
 
-	aexcey = aex * cey
-	cexaey = cex * aey
-	ac = aexcey - cexaey
-	bexdey = bex * dey
-	dexbey = dex * bey
-	bd = bexdey - dexbey
+	abc := aez*bc - bez*ac + cez*ab
+	bcd := bez*cd - cez*bd + dez*bc
+	cda := cez*da + dez*ac + aez*cd
+	dab := dez*ab + aez*bd + bez*da
 
-	abc = aez*bc - bez*ac + cez*ab
-	bcd = bez*cd - cez*bd + dez*bc
-	cda = cez*da + dez*ac + aez*cd
-	dab = dez*ab + aez*bd + bez*da
+	alift := aex*aex + aey*aey + aez*aez
+	blift := bex*bex + bey*bey + bez*bez
+	clift := cex*cex + cey*cey + cez*cez
+	dlift := dex*dex + dey*dey + dez*dez
 
-	alift = aex*aex + aey*aey + aez*aez
-	blift = bex*bex + bey*bey + bez*bez
-	clift = cex*cex + cey*cey + cez*cez
-	dlift = dex*dex + dey*dey + dez*dez
+	det := (dlift*abc - clift*dab) + (blift*cda - alift*bcd)
 
-	det = (dlift*abc - clift*dab) + (blift*cda - alift*bcd)
-
-	aezplus = math.Abs(aez)
-	bezplus = math.Abs(bez)
-	cezplus = math.Abs(cez)
-	dezplus = math.Abs(dez)
-	aexbeyplus = math.Abs(aexbey)
-	bexaeyplus = math.Abs(bexaey)
-	bexceyplus = math.Abs(bexcey)
-	cexbeyplus = math.Abs(cexbey)
-	cexdeyplus = math.Abs(cexdey)
-	dexceyplus = math.Abs(dexcey)
-	dexaeyplus = math.Abs(dexaey)
-	aexdeyplus = math.Abs(aexdey)
-	aexceyplus = math.Abs(aexcey)
-	cexaeyplus = math.Abs(cexaey)
-	bexdeyplus = math.Abs(bexdey)
-	dexbeyplus = math.Abs(dexbey)
-	permanent =
+	aezplus := math.Abs(aez)
+	bezplus := math.Abs(bez)
+	cezplus := math.Abs(cez)
+	dezplus := math.Abs(dez)
+	aexbeyplus := math.Abs(aexbey)
+	bexaeyplus := math.Abs(bexaey)
+	bexceyplus := math.Abs(bexcey)
+	cexbeyplus := math.Abs(cexbey)
+	cexdeyplus := math.Abs(cexdey)
+	dexceyplus := math.Abs(dexcey)
+	dexaeyplus := math.Abs(dexaey)
+	aexdeyplus := math.Abs(aexdey)
+	aexceyplus := math.Abs(aexcey)
+	cexaeyplus := math.Abs(cexaey)
+	bexdeyplus := math.Abs(bexdey)
+	dexbeyplus := math.Abs(dexbey)
+	permanent :=
 		((cexdeyplus+dexceyplus)*bezplus+
 			(dexbeyplus+bexdeyplus)*cezplus+
 			(bexceyplus+cexbeyplus)*dezplus)*
@@ -138,7 +126,7 @@ func inSphere(pa, pb, pc, pd, pe *C.double,
 				(cexaeyplus+aexceyplus)*bezplus+
 				(aexbeyplus+bexaeyplus)*cezplus)*
 				dlift
-	errbound = isperrboundA * permanent
+	errbound := isperrboundA * permanent
 	if (det > errbound) || (-det > errbound) {
 		return det
 	}

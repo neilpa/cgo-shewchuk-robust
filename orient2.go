@@ -45,8 +45,8 @@ func Orient2Ptr(a, b, c *float64) float64 {
 // orient2 implements the basic error bound checks to minimize
 // CGO calls to the adaptive implementation.
 func orient2(pa, pb, pc *C.double, detleft, detright float64) float64 {
-	var det, detsum float64
-	det = detleft - detright
+	var detsum float64
+	det := detleft - detright
 
 	if detleft > 0.0 {
 		if detright <= 0.0 {
