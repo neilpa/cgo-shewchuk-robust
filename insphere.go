@@ -13,9 +13,54 @@ import "math"
 //
 // Each slice parameter must contain at least 3 values.
 func InSphere(a, b, c, d, e []float64) float64 {
-	var aex, bex, cex, dex float64
-	var aey, bey, cey, dey float64
-	var aez, bez, cez, dez float64
+	pa := (*C.double)(&a[0])
+	pb := (*C.double)(&b[0])
+	pc := (*C.double)(&c[0])
+	pd := (*C.double)(&d[0])
+	pe := (*C.double)(&e[0])
+
+	return inSphere(pa, pb, pc, pd, pe,
+		a[0]-e[0], b[0]-e[0], c[0]-e[0], d[0]-e[0],
+		a[1]-e[1], b[1]-e[1], c[1]-e[1], d[1]-e[1],
+		a[2]-e[2], b[2]-e[2], c[2]-e[2], d[2]-e[2],
+	)
+}
+
+// InSphereVec is similiar to `InSphere` but takes a point-like struct
+// pointer rather than a slice.
+func InSphereVec(a, b, c, d, e *XYZ) float64 {
+	pa := (*C.double)(&a.X)
+	pb := (*C.double)(&b.X)
+	pc := (*C.double)(&c.X)
+	pd := (*C.double)(&d.X)
+	pe := (*C.double)(&e.X)
+
+	return inSphere(pa, pb, pc, pd, pe,
+		a.X-e.X, b.X-e.X, c.X-e.X, d.X-e.X,
+		a.Y-e.Y, b.Y-e.Y, c.Y-e.Y, d.Y-e.Y,
+		a.Z-e.Z, b.Z-e.Z, c.Z-e.Z, d.Z-e.Z,
+	)
+}
+
+// InSpherePtr is the direct wrapper of `insphere` from `predicates.c`.
+// See `InSphere` for additional details.
+func InSpherePtr(a, b, c, d, e *float64) float64 {
+	pa := (*C.double)(a)
+	pb := (*C.double)(b)
+	pc := (*C.double)(c)
+	pd := (*C.double)(d)
+	pe := (*C.double)(e)
+	return float64(C.insphere(pa, pb, pc, pd, pe))
+}
+
+// inCircle implements the basic error bound checks to minimize
+// CGO calls to the adaptive implementation.
+func inSphere(pa, pb, pc, pd, pe *C.double,
+	aex, bex, cex, dex float64,
+	aey, bey, cey, dey float64,
+	aez, bez, cez, dez float64,
+) float64 {
+
 	var aexbey, bexaey, bexcey, cexbey, cexdey, dexcey, dexaey, aexdey float64
 	var aexcey, cexaey, bexdey, dexbey float64
 	var alift, blift, clift, dlift float64
@@ -27,19 +72,6 @@ func InSphere(a, b, c, d, e []float64) float64 {
 	var aexceyplus, cexaeyplus, bexdeyplus, dexbeyplus float64
 	var det float64
 	var permanent, errbound float64
-
-	aex = a[0] - e[0]
-	bex = b[0] - e[0]
-	cex = c[0] - e[0]
-	dex = d[0] - e[0]
-	aey = a[1] - e[1]
-	bey = b[1] - e[1]
-	cey = c[1] - e[1]
-	dey = d[1] - e[1]
-	aez = a[2] - e[2]
-	bez = b[2] - e[2]
-	cez = c[2] - e[2]
-	dez = d[2] - e[2]
 
 	aexbey = aex * bey
 	bexaey = bex * aey
@@ -111,27 +143,5 @@ func InSphere(a, b, c, d, e []float64) float64 {
 		return det
 	}
 
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
-	pd := (*C.double)(&d[0])
-	pe := (*C.double)(&e[0])
 	return float64(C.insphereadapt(pa, pb, pc, pd, pe, C.double(permanent)))
-}
-
-// InSphereVec is similiar to `InSphere` but takes a point-like struct
-// pointer rather than a slice.
-func InSphereVec(a, b, c, d, e *XYZ) float64 {
-	return InSpherePtr(&a.X, &b.X, &c.X, &d.X, &e.X)
-}
-
-// InSpherePtr is the direct wrapper of `insphere` from `predicates.c`.
-// See `InSphere` for additional details.
-func InSpherePtr(a, b, c, d, e *float64) float64 {
-	pa := (*C.double)(a)
-	pb := (*C.double)(b)
-	pc := (*C.double)(c)
-	pd := (*C.double)(d)
-	pe := (*C.double)(e)
-	return float64(C.insphere(pa, pb, pc, pd, pe))
 }
