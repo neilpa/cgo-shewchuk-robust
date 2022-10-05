@@ -5,23 +5,14 @@ package robust
 import "C"
 import "math"
 
-// InSphere3D returns a positive value if the point e lies inside the
+// InSphere returns a positive value if the point e lies inside the
 // sphere passing through a, b, c, and d; a negative value if it lies
 // outside; and zero if the five points are cospherical. The points a,
 // b, c, and d must be ordered so that they have a positive orientation
-// (as defined by orient3d()), or the sign of the result will be reversed.
-func InSphere3D(a, b, c, d, e *float64) float64 {
-	pa := (*C.double)(a)
-	pb := (*C.double)(b)
-	pc := (*C.double)(c)
-	pd := (*C.double)(d)
-	pe := (*C.double)(e)
-	return float64(C.insphere(pa, pb, pc, pd, pe))
-}
-
-// InSphere3Ds is a convenience wrapper for InSphere3D. Each slice must
-// be at least 3 elements long, additional elements are ignored.
-func InSphere3Ds(a, b, c, d, e []float64) float64 {
+// (as defined by `Orient3`), or the sign of the result will be reversed.
+//
+// Each slice parameter must contain at least 3 values.
+func InSphere(a, b, c, d, e []float64) float64 {
 	var aex, bex, cex, dex float64
 	var aey, bey, cey, dey float64
 	var aez, bez, cez, dez float64
@@ -126,4 +117,21 @@ func InSphere3Ds(a, b, c, d, e []float64) float64 {
 	pd := (*C.double)(&d[0])
 	pe := (*C.double)(&e[0])
 	return float64(C.insphereadapt(pa, pb, pc, pd, pe, C.double(permanent)))
+}
+
+// InSphereVec is similiar to `InSphere` but takes a point-like struct
+// pointer rather than a slice.
+func InSphereVec(a, b, c, d, e *XYZ) float64 {
+	return InSpherePtr(&a.X, &b.X, &c.X, &d.X, &e.X)
+}
+
+// InSpherePtr is the direct wrapper of `insphere` from `predicates.c`.
+// See `InSphere` for additional details.
+func InSpherePtr(a, b, c, d, e *float64) float64 {
+	pa := (*C.double)(a)
+	pb := (*C.double)(b)
+	pc := (*C.double)(c)
+	pd := (*C.double)(d)
+	pe := (*C.double)(e)
+	return float64(C.insphere(pa, pb, pc, pd, pe))
 }

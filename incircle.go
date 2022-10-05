@@ -5,22 +5,14 @@ package robust
 import "C"
 import "math"
 
-// InCircle2D returns a positive value if the point d lies inside the
+// InCircle returns a positive value if the point d lies inside the
 // circle passing through a, b, and c; a negative value if it lies
 // outside; and zero if the four points are cocircular. The points
 // a, b, and c must be in counterclockwise order, or the sign of the
 // result will be reversed.
-func InCircle2D(a, b, c, d *float64) float64 {
-	pa := (*C.double)(a)
-	pb := (*C.double)(b)
-	pc := (*C.double)(c)
-	pd := (*C.double)(d)
-	return float64(C.incircle(pa, pb, pc, pd))
-}
-
-// InCircle2Ds is a convenience wrapper for InCircle2D. Each slice must
-// be at least 2 elements long, additional elements are ignored.
-func InCircle2Ds(a, b, c, d []float64) float64 {
+//
+// Each slice parameter must contain at least 2 values.
+func InCircle(a, b, c, d []float64) float64 {
 	var adx, bdx, cdx, ady, bdy, cdy float64
 	var bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady float64
 	var alift, blift, clift float64
@@ -66,4 +58,20 @@ func InCircle2Ds(a, b, c, d []float64) float64 {
 	pc := (*C.double)(&c[0])
 	pd := (*C.double)(&d[0])
 	return float64(C.incircleadapt(pa, pb, pc, pd, C.double(permanent)))
+}
+
+// InCircleVec is similiar to `InCircle` but takes a point-like struct
+// pointer rather than a slice.
+func InCircleVec(a, b, c, d *XY) float64 {
+	return InCirclePtr(&a.X, &b.X, &c.X, &d.X) // TODO
+}
+
+// InCirclePtr is the direct wrapper of `incircle` from `predicates.c`.
+// See `InCircle` for additional details.
+func InCirclePtr(a, b, c, d *float64) float64 {
+	pa := (*C.double)(a)
+	pb := (*C.double)(b)
+	pc := (*C.double)(c)
+	pd := (*C.double)(d)
+	return float64(C.incircle(pa, pb, pc, pd))
 }

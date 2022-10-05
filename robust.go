@@ -27,22 +27,6 @@
 //	res := robust.Orient2Ptr(&p0.x, &p1.x, &p2.x)
 package robust
 
-// TODO: Updated API Surface
-//
-// Orient2
-// Orient2Vec
-// Orient2Ptr
-// Orient3
-// Orient3Vec
-// Orient3Ptr
-// InCircle
-// InCircleVec
-// InCirclePtr
-// InSphere
-// InCircleVec
-// InCirclePtr
-//
-
 // void exactinit();
 // extern double ccwerrboundA, o3derrboundA, iccerrboundA, isperrboundA;
 import "C"
@@ -56,6 +40,12 @@ var (
 // directly but as a pointer cast target. See Orient2Vec and InCircleVec.
 type XY struct {
 	X, Y float64
+}
+
+// XYZ is a "template" for 3D vector types. It's not intended for use
+// directly but as a pointer cast target. See Orient3Vec and InSphereVec.
+type XYZ struct {
+	X, Y, Z float64
 }
 
 func init() {

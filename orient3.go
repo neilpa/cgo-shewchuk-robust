@@ -12,17 +12,9 @@ import "math"
 // zero if the points are coplanar. The result is also a rough
 // approximation of six times the signed volume of the tetrahedron
 // defined by the four points.
-func Orient3D(a, b, c, d *float64) float64 {
-	pa := (*C.double)(a)
-	pb := (*C.double)(b)
-	pc := (*C.double)(c)
-	pd := (*C.double)(d)
-	return float64(C.orient3d(pa, pb, pc, pd))
-}
-
-// Orient3Ds is a convenience wrapper for Orient3D. Each slice must
-// be at least 3 elements long, additional elements are ignored.
-func Orient3Ds(a, b, c, d []float64) float64 {
+//
+// Each slice parameter must contain at least 3 values.
+func Orient3(a, b, c, d []float64) float64 {
 	var adx, bdx, cdx, ady, bdy, cdy, adz, bdz, cdz float64
 	var bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady float64
 	var det float64
@@ -67,4 +59,20 @@ func Orient3Ds(a, b, c, d []float64) float64 {
 	pc := (*C.double)(&c[0])
 	pd := (*C.double)(&d[0])
 	return float64(C.orient3dadapt(pa, pb, pc, pd, C.double(permanent)))
+}
+
+// Orient3Vec is similiar to `Orient3` but takes a point-like struct
+// pointer rather than a slice.
+func Orient3Vec(a, b, c, d *XYZ) float64 {
+	return Orient3Ptr(&a.X, &b.X, &c.X, &d.X) // TODO: go error bounds check
+}
+
+// Orient3Ptr is the direct wrapper of `orient3d` from `predicates.c`.
+// See `Orient3` for additional details.
+func Orient3Ptr(a, b, c, d *float64) float64 {
+	pa := (*C.double)(a)
+	pb := (*C.double)(b)
+	pc := (*C.double)(c)
+	pd := (*C.double)(d)
+	return float64(C.orient3d(pa, pb, pc, pd))
 }

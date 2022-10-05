@@ -7,7 +7,7 @@ import (
 	robust "neilpa.me/cgo-shewchuk-robust"
 )
 
-func Test_Orient2d(t *testing.T) {
+func Test_Orient2(t *testing.T) {
 	tests := []struct {
 		ax, ay, bx, by, cx, cy float64
 		want                   int
@@ -41,8 +41,13 @@ func Test_Orient2d(t *testing.T) {
 			a := []float64{tt.ax, tt.ay}
 			b := []float64{tt.bx, tt.by}
 			c := []float64{tt.cx, tt.cy}
-			assert(t, tt.want, robust.Orient2Ds(a, b, c))
-			assert(t, tt.want, robust.Orient2D(&a[0], &b[0], &c[0]))
+			assert(t, tt.want, robust.Orient2(a, b, c))
+			assert(t, tt.want, robust.Orient2Ptr(&a[0], &b[0], &c[0]))
+
+			va := Vec2{tt.ax, tt.ay}
+			vb := Vec2{tt.bx, tt.by}
+			vc := Vec2{tt.cx, tt.cy}
+			assert(t, tt.want, robust.Orient2Vec((*robust.XY)(&va), (*robust.XY)(&vb), (*robust.XY)(&vc)))
 		})
 	}
 
@@ -52,19 +57,64 @@ func Test_Orient2d(t *testing.T) {
 			a := []float64{tt.args[0], tt.args[1]}
 			b := []float64{tt.args[2], tt.args[3]}
 			c := []float64{tt.args[4], tt.args[5]}
-			res := robust.Orient2Ds(a, b, c)
+			res := robust.Orient2(a, b, c)
 			assert(t, tt.sign, res)
 
 			va := Vec2{tt.args[0], tt.args[1]}
 			vb := Vec2{tt.args[2], tt.args[3]}
 			vc := Vec2{tt.args[4], tt.args[5]}
-			res = robust.Orient2D(&va.X, &vb.X, &vc.X)
+			res = robust.Orient2Ptr(&va.X, &vb.X, &vc.X)
+			assert(t, tt.sign, res)
+
+			res = robust.Orient2Vec((*robust.XY)(&va), (*robust.XY)(&vb), (*robust.XY)(&vc))
 			assert(t, tt.sign, res)
 		})
 	}
 }
 
-func Benchmark_Orient2D_Vec2(b *testing.B) {
+func Benchmark_Orient2(b *testing.B) {
+	fixtures := load(b, "orient2d.txt", 6)
+	tests := make([][3][]float64, len(fixtures))
+	for i, tt := range fixtures {
+		tests[i] = [3][]float64{
+			{tt.args[0], tt.args[1]},
+			{tt.args[2], tt.args[3]},
+			{tt.args[4], tt.args[5]},
+		}
+	}
+
+	b.ResetTimer()
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, arr := range tests {
+			res = robust.Orient2(arr[0], arr[1], arr[2])
+		}
+	}
+	result = res
+}
+
+func Benchmark_Orient2Ptr(b *testing.B) {
+	fixtures := load(b, "orient2d.txt", 6)
+
+	tests := make([][3]*float64, len(fixtures))
+	for i, tt := range fixtures {
+		va := Vec2{tt.args[0], tt.args[1]}
+		vb := Vec2{tt.args[2], tt.args[3]}
+		vc := Vec2{tt.args[4], tt.args[5]}
+		tests[i] = [3]*float64{&va.X, &vb.X, &vc.X}
+	}
+
+	b.ResetTimer()
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, ptrs := range tests {
+			res = robust.Orient2Ptr(ptrs[0], ptrs[1], ptrs[2])
+		}
+	}
+	result = res
+}
+
+func Benchmark_Orient2Vec(b *testing.B) {
 	fixtures := load(b, "orient2d.txt", 6)
 
 	tests := make([][3]*Vec2, len(fixtures))
@@ -82,48 +132,6 @@ func Benchmark_Orient2D_Vec2(b *testing.B) {
 		for _, vecs := range tests {
 			va, vb, vc := vecs[0], vecs[1], vecs[2]
 			res = robust.Orient2Vec((*robust.XY)(va), (*robust.XY)(vb), (*robust.XY)(vc))
-		}
-	}
-	result = res
-}
-
-func Benchmark_Orient2D_Ptr(b *testing.B) {
-	fixtures := load(b, "orient2d.txt", 6)
-
-	tests := make([][3]*float64, len(fixtures))
-	for i, tt := range fixtures {
-		va := Vec2{tt.args[0], tt.args[1]}
-		vb := Vec2{tt.args[2], tt.args[3]}
-		vc := Vec2{tt.args[4], tt.args[5]}
-		tests[i] = [3]*float64{&va.X, &vb.X, &vc.X}
-	}
-
-	b.ResetTimer()
-	var res float64
-	for n := 0; n < b.N; n++ {
-		for _, ptrs := range tests {
-			res = robust.Orient2D(ptrs[0], ptrs[1], ptrs[2])
-		}
-	}
-	result = res
-}
-
-func Benchmark_Orient2D_Slice(b *testing.B) {
-	fixtures := load(b, "orient2d.txt", 6)
-	tests := make([][3][]float64, len(fixtures))
-	for i, tt := range fixtures {
-		tests[i] = [3][]float64{
-			{tt.args[0], tt.args[1]},
-			{tt.args[2], tt.args[3]},
-			{tt.args[4], tt.args[5]},
-		}
-	}
-
-	b.ResetTimer()
-	var res float64
-	for n := 0; n < b.N; n++ {
-		for _, arr := range tests {
-			res = robust.Orient2Ds(arr[0], arr[1], arr[2])
 		}
 	}
 	result = res

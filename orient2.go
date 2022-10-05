@@ -4,27 +4,27 @@ package robust
 // double orient2dadapt(double *pa, double *pb, double *pc, double detsum);
 import "C"
 
-// Orient2D returns a positive value if the points a, b, and c occur in
+// TODO: Updated API Surface
+//
+// Orient3
+// Orient3Vec
+// Orient3Ptr
+// InCircle
+// InCircleVec
+// InCirclePtr
+// InSphere
+// InCircleVec
+// InCirclePtr
+//
+
+// Orient2 returns a positive value if the points a, b, and c occur in
 // counterclockwise order; a negative value if they occur in clockwise
 // order; and zero if they are collinear. The result is also a rough
 // approximation of twice the signed area of the triangle defined by the
 // three points.
 //
-// Each pointer must at least 2 contiguous values.
-func Orient2D(a, b, c *float64) float64 {
-	pa := (*C.double)(a)
-	pb := (*C.double)(b)
-	pc := (*C.double)(c)
-	return float64(C.orient2d(pa, pb, pc))
-}
-
-func Orient2Vec(a, b, c *XY) float64 {
-	return Orient2D(&a.X, &b.X, &c.X)
-}
-
-// Orient2Ds is a convenience wrapper for Orient2D. Each slice must
-// be at least 2 elements long, additional elements are ignored.
-func Orient2Ds(a, b, c []float64) float64 {
+// Each slice parameter must contain at least 2 values.
+func Orient2(a, b, c []float64) float64 {
 	var detleft, detright, det float64
 	var detsum float64
 
@@ -57,4 +57,19 @@ func Orient2Ds(a, b, c []float64) float64 {
 	pb := (*C.double)(&b[0])
 	pc := (*C.double)(&c[0])
 	return float64(C.orient2dadapt(pa, pb, pc, C.double(detsum)))
+}
+
+// Orient2Vec is similiar to `Orient2` but takes a point-like struct
+// pointer rather than a slice.
+func Orient2Vec(a, b, c *XY) float64 {
+	return Orient2Ptr(&a.X, &b.X, &c.X) // TODO: go error bounds check
+}
+
+// Orient2Ptr is the direct wrapper of `orient2d` from `predicates.c`.
+// See `Orient2` for additional details.
+func Orient2Ptr(a, b, c *float64) float64 {
+	pa := (*C.double)(a)
+	pb := (*C.double)(b)
+	pc := (*C.double)(c)
+	return float64(C.orient2d(pa, pb, pc))
 }

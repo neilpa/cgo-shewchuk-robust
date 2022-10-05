@@ -22,8 +22,16 @@ func Test_InSphere(t *testing.T) {
 			c := []float64{tt.cx, tt.cy, tt.cz}
 			d := []float64{tt.dx, tt.dy, tt.dz}
 			e := []float64{tt.ex, tt.ey, tt.ez}
-			assert(t, tt.want, robust.InSphere3D(&a[0], &b[0], &c[0], &d[0], &e[0]))
-			assert(t, tt.want, robust.InSphere3Ds(a, b, c, d, e))
+			assert(t, tt.want, robust.InSpherePtr(&a[0], &b[0], &c[0], &d[0], &e[0]))
+			assert(t, tt.want, robust.InSphere(a, b, c, d, e))
+
+			va := Vec3{tt.ax, tt.ay, tt.az}
+			vb := Vec3{tt.bx, tt.by, tt.bz}
+			vc := Vec3{tt.cx, tt.cy, tt.cz}
+			vd := Vec3{tt.dx, tt.dy, tt.dz}
+			ve := Vec3{tt.ex, tt.ey, tt.ez}
+			res := robust.InSphereVec((*robust.XYZ)(&va), (*robust.XYZ)(&vb), (*robust.XYZ)(&vc), (*robust.XYZ)(&vd), (*robust.XYZ)(&ve))
+			assert(t, tt.want, res)
 		})
 	}
 
@@ -35,7 +43,7 @@ func Test_InSphere(t *testing.T) {
 			c := []float64{tt.args[6], tt.args[7], tt.args[8]}
 			d := []float64{tt.args[9], tt.args[10], tt.args[11]}
 			e := []float64{tt.args[12], tt.args[13], tt.args[14]}
-			res := robust.InSphere3Ds(a, b, c, d, e)
+			res := robust.InSphere(a, b, c, d, e)
 			assert(t, tt.sign, res)
 
 			va := Vec3{tt.args[0], tt.args[1], tt.args[2]}
@@ -43,36 +51,16 @@ func Test_InSphere(t *testing.T) {
 			vc := Vec3{tt.args[6], tt.args[7], tt.args[8]}
 			vd := Vec3{tt.args[9], tt.args[10], tt.args[11]}
 			ve := Vec3{tt.args[12], tt.args[13], tt.args[14]}
-			res = robust.InSphere3D(&va.X, &vb.X, &vc.X, &vd.X, &ve.X)
+			res = robust.InSpherePtr(&va.X, &vb.X, &vc.X, &vd.X, &ve.X)
+			assert(t, tt.sign, res)
+
+			res = robust.InSphereVec((*robust.XYZ)(&va), (*robust.XYZ)(&vb), (*robust.XYZ)(&vc), (*robust.XYZ)(&vd), (*robust.XYZ)(&ve))
 			assert(t, tt.sign, res)
 		})
 	}
 }
 
-func Benchmark_InSphere_Ptr(b *testing.B) {
-	fixtures := load(b, "insphere3d.txt", 15)
-
-	tests := make([][5]*float64, len(fixtures))
-	for i, tt := range fixtures {
-		va := Vec3{tt.args[0], tt.args[1], tt.args[2]}
-		vb := Vec3{tt.args[3], tt.args[4], tt.args[5]}
-		vc := Vec3{tt.args[6], tt.args[7], tt.args[8]}
-		vd := Vec3{tt.args[9], tt.args[10], tt.args[11]}
-		ve := Vec3{tt.args[12], tt.args[13], tt.args[14]}
-		tests[i] = [5]*float64{&va.X, &vb.X, &vc.X, &vd.X, &ve.X}
-	}
-
-	b.ResetTimer()
-	var res float64
-	for n := 0; n < b.N; n++ {
-		for _, ptrs := range tests {
-			res = robust.InSphere3D(ptrs[0], ptrs[1], ptrs[2], ptrs[3], ptrs[4])
-		}
-	}
-	result = res
-}
-
-func Benchmark_InSphere_Slice(b *testing.B) {
+func Benchmark_InSphere(b *testing.B) {
 	fixtures := load(b, "insphere3d.txt", 15)
 
 	tests := make([][5][]float64, len(fixtures))
@@ -89,7 +77,53 @@ func Benchmark_InSphere_Slice(b *testing.B) {
 	var res float64
 	for n := 0; n < b.N; n++ {
 		for _, arrs := range tests {
-			res = robust.InSphere3Ds(arrs[0], arrs[1], arrs[2], arrs[3], arrs[4])
+			res = robust.InSphere(arrs[0], arrs[1], arrs[2], arrs[3], arrs[4])
+		}
+	}
+	result = res
+}
+
+func Benchmark_InSpherePtr(b *testing.B) {
+	fixtures := load(b, "insphere3d.txt", 15)
+
+	tests := make([][5]*float64, len(fixtures))
+	for i, tt := range fixtures {
+		va := Vec3{tt.args[0], tt.args[1], tt.args[2]}
+		vb := Vec3{tt.args[3], tt.args[4], tt.args[5]}
+		vc := Vec3{tt.args[6], tt.args[7], tt.args[8]}
+		vd := Vec3{tt.args[9], tt.args[10], tt.args[11]}
+		ve := Vec3{tt.args[12], tt.args[13], tt.args[14]}
+		tests[i] = [5]*float64{&va.X, &vb.X, &vc.X, &vd.X, &ve.X}
+	}
+
+	b.ResetTimer()
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, ptrs := range tests {
+			res = robust.InSpherePtr(ptrs[0], ptrs[1], ptrs[2], ptrs[3], ptrs[4])
+		}
+	}
+	result = res
+}
+
+func Benchmark_InSphereVec(b *testing.B) {
+	fixtures := load(b, "insphere3d.txt", 15)
+
+	tests := make([][5]*Vec3, len(fixtures))
+	for i, tt := range fixtures {
+		va := Vec3{tt.args[0], tt.args[1], tt.args[2]}
+		vb := Vec3{tt.args[3], tt.args[4], tt.args[5]}
+		vc := Vec3{tt.args[6], tt.args[7], tt.args[8]}
+		vd := Vec3{tt.args[9], tt.args[10], tt.args[11]}
+		ve := Vec3{tt.args[12], tt.args[13], tt.args[14]}
+		tests[i] = [5]*Vec3{&va, &vb, &vc, &vd, &ve}
+	}
+
+	b.ResetTimer()
+	var res float64
+	for n := 0; n < b.N; n++ {
+		for _, vecs := range tests {
+			res = robust.InSphereVec((*robust.XYZ)(vecs[0]), (*robust.XYZ)(vecs[1]), (*robust.XYZ)(vecs[2]), (*robust.XYZ)(vecs[3]), (*robust.XYZ)(vecs[4]))
 		}
 	}
 	result = res
