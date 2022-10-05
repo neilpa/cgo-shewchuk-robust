@@ -49,7 +49,13 @@ func Orient2(a, b, c []float64) float64 {
 // Orient2Vec is similiar to `Orient2` but takes a point-like struct
 // pointer rather than a slice.
 func Orient2Vec(a, b, c *XY) float64 {
-	return Orient2Ptr(&a.X, &b.X, &c.X) // TODO: go error bounds check
+	detleft := (a.X - c.X) * (b.Y - c.Y)
+	detright := (a.Y - c.Y) * (b.X - c.X)
+	pa := (*C.double)(&a.X)
+	pb := (*C.double)(&b.X)
+	pc := (*C.double)(&c.X)
+
+	return orient2(pa, pb, pc, detleft, detright)
 }
 
 // Orient2Ptr is the direct wrapper of `orient2d` from `predicates.c`.
@@ -59,4 +65,34 @@ func Orient2Ptr(a, b, c *float64) float64 {
 	pb := (*C.double)(b)
 	pc := (*C.double)(c)
 	return float64(C.orient2d(pa, pb, pc))
+}
+
+// orient2 implements the basic error bound checks to minimize
+// CGO calls to the adaptive implementation.
+func orient2(pa, pb, pc *C.double, detleft, detright float64) float64 {
+	var det, detsum float64
+	det = detleft - detright
+
+	if detleft > 0.0 {
+		if detright <= 0.0 {
+			return det
+		} else {
+			detsum = detleft + detright
+		}
+	} else if detleft < 0.0 {
+		if detright >= 0.0 {
+			return det
+		} else {
+			detsum = -detleft - detright
+		}
+	} else {
+		return det
+	}
+
+	errbound := ccwerrboundA * detsum
+	if (det >= errbound) || (-det >= errbound) {
+		return det
+	}
+
+	return float64(C.orient2dadapt(pa, pb, pc, C.double(detsum)))
 }
