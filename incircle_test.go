@@ -33,7 +33,7 @@ func Test_InCircle(t *testing.T) {
 		})
 	}
 
-	fixtures := load(t, "incircle2d.txt", 8)
+	fixtures := load(t, "incircle.txt", 8)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
 			a := []float64{tt.args[0], tt.args[1]}
@@ -57,7 +57,7 @@ func Test_InCircle(t *testing.T) {
 }
 
 func Benchmark_InCircle(b *testing.B) {
-	fixtures := load(b, "incircle2d.txt", 8)
+	fixtures := load(b, "incircle.txt", 8)
 
 	tests := make([][4][]float64, len(fixtures))
 	for i, tt := range fixtures {
@@ -79,7 +79,7 @@ func Benchmark_InCircle(b *testing.B) {
 }
 
 func Benchmark_InCirclePtr(b *testing.B) {
-	fixtures := load(b, "incircle2d.txt", 8)
+	fixtures := load(b, "incircle.txt", 8)
 
 	tests := make([][4]*float64, len(fixtures))
 	for i, tt := range fixtures {
@@ -101,7 +101,7 @@ func Benchmark_InCirclePtr(b *testing.B) {
 }
 
 func Benchmark_InCircleVec(b *testing.B) {
-	fixtures := load(b, "incircle2d.txt", 8)
+	fixtures := load(b, "incircle.txt", 8)
 
 	tests := make([][4]*Vec2, len(fixtures))
 	for i, tt := range fixtures {

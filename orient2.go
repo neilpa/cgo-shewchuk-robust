@@ -4,19 +4,6 @@ package robust
 // double orient2dadapt(double *pa, double *pb, double *pc, double detsum);
 import "C"
 
-// TODO: Updated API Surface
-//
-// Orient3
-// Orient3Vec
-// Orient3Ptr
-// InCircle
-// InCircleVec
-// InCirclePtr
-// InSphere
-// InCircleVec
-// InCirclePtr
-//
-
 // Orient2 returns a positive value if the points a, b, and c occur in
 // counterclockwise order; a negative value if they occur in clockwise
 // order; and zero if they are collinear. The result is also a rough

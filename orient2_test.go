@@ -51,7 +51,7 @@ func Test_Orient2(t *testing.T) {
 		})
 	}
 
-	fixtures := load(t, "orient2d.txt", 6)
+	fixtures := load(t, "orient2.txt", 6)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
 			a := []float64{tt.args[0], tt.args[1]}
@@ -73,7 +73,7 @@ func Test_Orient2(t *testing.T) {
 }
 
 func Benchmark_Orient2(b *testing.B) {
-	fixtures := load(b, "orient2d.txt", 6)
+	fixtures := load(b, "orient2.txt", 6)
 	tests := make([][3][]float64, len(fixtures))
 	for i, tt := range fixtures {
 		tests[i] = [3][]float64{
@@ -94,7 +94,7 @@ func Benchmark_Orient2(b *testing.B) {
 }
 
 func Benchmark_Orient2Ptr(b *testing.B) {
-	fixtures := load(b, "orient2d.txt", 6)
+	fixtures := load(b, "orient2.txt", 6)
 
 	tests := make([][3]*float64, len(fixtures))
 	for i, tt := range fixtures {
@@ -115,7 +115,7 @@ func Benchmark_Orient2Ptr(b *testing.B) {
 }
 
 func Benchmark_Orient2Vec(b *testing.B) {
-	fixtures := load(b, "orient2d.txt", 6)
+	fixtures := load(b, "orient2.txt", 6)
 
 	tests := make([][3]*Vec2, len(fixtures))
 	for i, tt := range fixtures {
