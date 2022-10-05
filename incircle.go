@@ -13,18 +13,46 @@ import "math"
 //
 // Each slice parameter must contain at least 2 values.
 func InCircle(a, b, c, d []float64) float64 {
-	var adx, bdx, cdx, ady, bdy, cdy float64
+	pa := (*C.double)(&a[0])
+	pb := (*C.double)(&b[0])
+	pc := (*C.double)(&c[0])
+	pd := (*C.double)(&d[0])
+	return inCircle(pa, pb, pc, pd,
+		a[0]-d[0], b[0]-d[0], c[0]-d[0],
+		a[1]-d[1], b[1]-d[1], c[1]-d[1])
+}
+
+// InCircleVec is similiar to `InCircle` but takes a point-like struct
+// pointer rather than a slice.
+func InCircleVec(a, b, c, d *XY) float64 {
+	pa := (*C.double)(&a.X)
+	pb := (*C.double)(&b.X)
+	pc := (*C.double)(&c.X)
+	pd := (*C.double)(&d.X)
+	return inCircle(pa, pb, pc, pd,
+		a.X-d.X, b.X-d.X, c.X-d.X,
+		a.Y-d.Y, b.Y-d.Y, c.Y-d.Y)
+}
+
+// InCirclePtr is the direct wrapper of `incircle` from `predicates.c`.
+// See `InCircle` for additional details.
+func InCirclePtr(a, b, c, d *float64) float64 {
+	pa := (*C.double)(a)
+	pb := (*C.double)(b)
+	pc := (*C.double)(c)
+	pd := (*C.double)(d)
+	return float64(C.incircle(pa, pb, pc, pd))
+}
+
+// inCircle implements the basic error bound checks to minimize
+// CGO calls to the adaptive implementation.
+func inCircle(pa, pb, pc, pd *C.double,
+	adx, bdx, cdx, ady, bdy, cdy float64) float64 {
+
 	var bdxcdy, cdxbdy, cdxady, adxcdy, adxbdy, bdxady float64
 	var alift, blift, clift float64
 	var det float64
 	var permanent, errbound float64
-
-	adx = a[0] - d[0]
-	bdx = b[0] - d[0]
-	cdx = c[0] - d[0]
-	ady = a[1] - d[1]
-	bdy = b[1] - d[1]
-	cdy = c[1] - d[1]
 
 	bdxcdy = bdx * cdy
 	cdxbdy = cdx * bdy
@@ -53,25 +81,5 @@ func InCircle(a, b, c, d []float64) float64 {
 		return det
 	}
 
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
-	pd := (*C.double)(&d[0])
 	return float64(C.incircleadapt(pa, pb, pc, pd, C.double(permanent)))
-}
-
-// InCircleVec is similiar to `InCircle` but takes a point-like struct
-// pointer rather than a slice.
-func InCircleVec(a, b, c, d *XY) float64 {
-	return InCirclePtr(&a.X, &b.X, &c.X, &d.X) // TODO
-}
-
-// InCirclePtr is the direct wrapper of `incircle` from `predicates.c`.
-// See `InCircle` for additional details.
-func InCirclePtr(a, b, c, d *float64) float64 {
-	pa := (*C.double)(a)
-	pb := (*C.double)(b)
-	pc := (*C.double)(c)
-	pd := (*C.double)(d)
-	return float64(C.incircle(pa, pb, pc, pd))
 }
