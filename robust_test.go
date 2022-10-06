@@ -47,11 +47,11 @@ func load(t testing.TB, path string, coords int) []testcase {
 	for scanner.Scan() {
 		var tt testcase
 		parts := strings.Split(scanner.Text(), " ")
-		if len(parts) != coords+2 {
-			t.Fatalf("Coord count doens't match, got: %d want: %d", len(parts)-2, coords)
+		if len(parts) != coords+1 {
+			t.Fatalf("Coord count mismatch, got: %d want: %d", len(parts)-1, coords)
 		}
 
-		for _, field := range parts[1 : len(parts)-1] {
+		for _, field := range parts[:len(parts)-1] {
 			n, err := strconv.ParseFloat(field, 64)
 			if err != nil {
 				t.Fatal(err)
