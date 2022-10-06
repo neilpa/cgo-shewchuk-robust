@@ -13,7 +13,7 @@ There are four base predicates, each taking slice arguments.
 * [`InCircle`][docs-incircle] - containment of a point in a directed circle
 * [`InSphere`][docs-insphere] - containment of a point in a directed sphere
 
-Each predicate has two other flavors taking struct and C-Array style pointers. See the [docs][] for more details.
+Each predicate has two other flavors taking struct (`*Vec`) and C-array style pointers (`*Ptr`). See the [docs][] for more details.
 
 ## Tests
 
