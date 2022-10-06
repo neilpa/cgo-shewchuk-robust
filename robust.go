@@ -2,125 +2,58 @@
 // Jonathan Shewchuk. Only the primary adaptive functions are exported from
 // this package.
 //
-// Each of the core functions takes `*float64` arguments that should be
-// C-like arrays of at least 2 or 3 values for the respective dimensionality.
-// For use with slice types or flat buffers of point values, take the address
-// of the x-coordinate of the target index, e.g.
+// <https://www.cs.cmu.edu/~quake/robust.html>
 //
-// 	res := robust.Orient2D(&buf[i], &buf[i+2], &buf[i+4])
+// Each of the core functions takes `[]float64` arguments that should be
+// at least 2 or 3 values in length for the respective dimensionality. This
+// makes it easy to work with large flat buffers of many points that can be
+// sliced efficiently.
 //
-// Alternatively, if you have point-like struct types with X, Y or X, Y, Z
-// coordinates, use the address of the X field, e.g.
+// There are also `*Vec` suffixed functions that take point-like values of
+// the shape `*struct{ X,Y float64 }` or `*struct{ X,Y,Z float64 }`. Use
+// requires casting to the target type of this package, e.g.
 //
-//	res := robust.Orient2D(&p0.X, &p1.X, &p2.X)
+//	var a, b, c MyVec2
+//	res := robust.Orient2Vec((*robust.XY)(&a), (*robust.XY)(&b), (*robust.XY)(&c))
 //
-// There are also `s` suffixed convenience functions taking `[]float64`
-// arguments that use the first element as the X coordinate.
+// Both the slice and struct variants do initial error bounds check in go
+// which avoids uncessary CGO calls in the simple cases. Only if those
+// fail are the corresponding `*adapt` C functions called. This provides
+// the most notable performance impact in the `Orient*` methods.
+//
+// Finally, there are `*Ptr` suffixed functions that take C-like arrays of
+// at least 2 or 3 `*float64` values. These directly wrap the equivalent
+// C functions and don't do any error bounds checking in go. As such, they
+// always incur the CGO overhead but allow directly passing pointers, e.g.
+//
+//	res := robust.Orient2Ptr(&p0.x, &p1.x, &p2.x)
 package robust
 
 // void exactinit();
-// double orient2d(double *pa, double *pb, double *pc);
-// double orient3d(double *pa, double *pb, double *pc, double *pd);
-// double incircle(double *pa, double *pb, double *pc, double *pd);
-// double insphere(double *pa, double *pb, double *pc, double *pd, double *pe);
+// extern double ccwerrboundA, o3derrboundA, iccerrboundA, isperrboundA;
 import "C"
+
+// Cache values from CGO init
+var (
+	ccwerrboundA, o3derrboundA, iccerrboundA, isperrboundA float64
+)
+
+// XY is a "template" for 2D vector types. It's not intended for use
+// directly but as a pointer cast target. See Orient2Vec and InCircleVec.
+type XY struct {
+	X, Y float64
+}
+
+// XYZ is a "template" for 3D vector types. It's not intended for use
+// directly but as a pointer cast target. See Orient3Vec and InSphereVec.
+type XYZ struct {
+	X, Y, Z float64
+}
 
 func init() {
 	C.exactinit()
-}
-
-// Orient2D returns a positive value if the points a, b, and c occur in
-// counterclockwise order; a negative value if they occur in clockwise
-// order; and zero if they are collinear. The result is also a rough
-// approximation of twice the signed area of the triangle defined by the
-// three points.
-//
-// Each pointer must at least 2 contiguous values.
-func Orient2D(a, b, c *float64) float64 {
-	pa := (*C.double)(a)
-	pb := (*C.double)(b)
-	pc := (*C.double)(c)
-	return float64(C.orient2d(pa, pb, pc))
-}
-
-// Orient2Ds is a convenience wrapper for Orient2D. Each slice must
-// be at least 2 elements long, additional elements are ignored.
-func Orient2Ds(a, b, c []float64) float64 {
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
-	return float64(C.orient2d(pa, pb, pc))
-}
-
-// Orient3D returns a positive value if the point pd lies below the
-// plane passing through a, b, and c; "below" is defined so that a, b,
-// and c appear in counterclockwise order when viewed from above the
-// plane. Returns a negative value if d lies above the plane. Returns
-// zero if the points are coplanar. The result is also a rough
-// approximation of six times the signed volume of the tetrahedron
-// defined by the four points.
-func Orient3D(a, b, c, d *float64) float64 {
-	pa := (*C.double)(a)
-	pb := (*C.double)(b)
-	pc := (*C.double)(c)
-	pd := (*C.double)(d)
-	return float64(C.orient3d(pa, pb, pc, pd))
-}
-
-// Orient3Ds is a convenience wrapper for Orient3D. Each slice must
-// be at least 3 elements long, additional elements are ignored.
-func Orient3Ds(a, b, c, d []float64) float64 {
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
-	pd := (*C.double)(&d[0])
-	return float64(C.orient3d(pa, pb, pc, pd))
-}
-
-// InCircle2D returns a positive value if the point d lies inside the
-// circle passing through a, b, and c; a negative value if it lies
-// outside; and zero if the four points are cocircular. The points
-// a, b, and c must be in counterclockwise order, or the sign of the
-// result will be reversed.
-func InCircle2D(a, b, c, d *float64) float64 {
-	pa := (*C.double)(a)
-	pb := (*C.double)(b)
-	pc := (*C.double)(c)
-	pd := (*C.double)(d)
-	return float64(C.incircle(pa, pb, pc, pd))
-}
-
-// InCircle2Ds is a convenience wrapper for InCircle2D. Each slice must
-// be at least 2 elements long, additional elements are ignored.
-func InCircle2Ds(a, b, c, d []float64) float64 {
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
-	pd := (*C.double)(&d[0])
-	return float64(C.incircle(pa, pb, pc, pd))
-}
-
-// InSphere3D returns a positive value if the point e lies inside the
-// sphere passing through a, b, c, and d; a negative value if it lies
-// outside; and zero if the five points are cospherical. The points a,
-// b, c, and d must be ordered so that they have a positive orientation
-// (as defined by orient3d()), or the sign of the result will be reversed.
-func InSphere3D(a, b, c, d, e *float64) float64 {
-	pa := (*C.double)(a)
-	pb := (*C.double)(b)
-	pc := (*C.double)(c)
-	pd := (*C.double)(d)
-	pe := (*C.double)(e)
-	return float64(C.insphere(pa, pb, pc, pd, pe))
-}
-
-// InSphere3Ds is a convenience wrapper for InSphere3D. Each slice must
-// be at least 3 elements long, additional elements are ignored.
-func InSphere3Ds(a, b, c, d, e []float64) float64 {
-	pa := (*C.double)(&a[0])
-	pb := (*C.double)(&b[0])
-	pc := (*C.double)(&c[0])
-	pd := (*C.double)(&d[0])
-	pe := (*C.double)(&e[0])
-	return float64(C.insphere(pa, pb, pc, pd, pe))
+	ccwerrboundA = float64(C.ccwerrboundA)
+	o3derrboundA = float64(C.o3derrboundA)
+	iccerrboundA = float64(C.iccerrboundA)
+	isperrboundA = float64(C.isperrboundA)
 }
