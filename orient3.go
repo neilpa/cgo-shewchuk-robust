@@ -5,7 +5,7 @@ package robust
 import "C"
 import "math"
 
-// Orient3D returns a positive value if the point pd lies below the
+// Orient3D returns a positive value if the point d lies below the
 // plane passing through a, b, and c; "below" is defined so that a, b,
 // and c appear in counterclockwise order when viewed from above the
 // plane. Returns a negative value if d lies above the plane. Returns
