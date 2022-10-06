@@ -13,29 +13,12 @@ type Vec3 struct{ X, Y, Z float64 }
 
 var result float64 // benchmark results
 
-func assert(t *testing.T, want int, got float64) {
-	t.Helper()
-	if sign(got) != want {
-		t.Errorf("want: %d; got: sign(%g)", want, got)
-	}
-}
-
-func sign(n float64) int {
-	if n < 0 {
-		return -1
-	}
-	if n > 0 {
-		return 1
-	}
-	return 0
-}
-
 type testcase struct {
 	args []float64
 	sign int
 }
 
-func load(t testing.TB, path string, coords int) []testcase {
+func loadCases(t testing.TB, path string, coords int) []testcase {
 	f, err := os.Open("test_data/" + path)
 	if err != nil {
 		t.Fatal(err)
@@ -47,6 +30,11 @@ func load(t testing.TB, path string, coords int) []testcase {
 	for scanner.Scan() {
 		var tt testcase
 		parts := strings.Split(scanner.Text(), " ")
+
+		if strings.TrimSpace(parts[0]) == "" || parts[0][0] == '#' {
+			continue // skip empty and comment lines
+		}
+
 		if len(parts) != coords+1 {
 			t.Fatalf("Coord count mismatch, got: %d want: %d", len(parts)-1, coords)
 		}
@@ -68,4 +56,21 @@ func load(t testing.TB, path string, coords int) []testcase {
 		t.Fatal(err)
 	}
 	return tests
+}
+
+func assert(t *testing.T, want int, got float64) {
+	t.Helper()
+	if sign(got) != want {
+		t.Errorf("want: %d; got: sign(%g)", want, got)
+	}
+}
+
+func sign(n float64) int {
+	if n < 0 {
+		return -1
+	}
+	if n > 0 {
+		return 1
+	}
+	return 0
 }
