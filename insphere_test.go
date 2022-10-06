@@ -8,33 +8,6 @@ import (
 )
 
 func Test_InSphere(t *testing.T) {
-	tests := []struct {
-		ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz, ex, ey, ez float64
-		want                                                       int
-	}{
-		{0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0.5, 0.5, 0.5, 1},
-		{0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, 0.5, -1},
-	}
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("basic: %d", i), func(t *testing.T) {
-			a := []float64{tt.ax, tt.ay, tt.az}
-			b := []float64{tt.bx, tt.by, tt.bz}
-			c := []float64{tt.cx, tt.cy, tt.cz}
-			d := []float64{tt.dx, tt.dy, tt.dz}
-			e := []float64{tt.ex, tt.ey, tt.ez}
-			assert(t, tt.want, robust.InSpherePtr(&a[0], &b[0], &c[0], &d[0], &e[0]))
-			assert(t, tt.want, robust.InSphere(a, b, c, d, e))
-
-			va := Vec3{tt.ax, tt.ay, tt.az}
-			vb := Vec3{tt.bx, tt.by, tt.bz}
-			vc := Vec3{tt.cx, tt.cy, tt.cz}
-			vd := Vec3{tt.dx, tt.dy, tt.dz}
-			ve := Vec3{tt.ex, tt.ey, tt.ez}
-			res := robust.InSphereVec((*robust.XYZ)(&va), (*robust.XYZ)(&vb), (*robust.XYZ)(&vc), (*robust.XYZ)(&vd), (*robust.XYZ)(&ve))
-			assert(t, tt.want, res)
-		})
-	}
-
 	fixtures := loadCases(t, "insphere.txt", 15)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {

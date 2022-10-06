@@ -8,49 +8,6 @@ import (
 )
 
 func Test_Orient2(t *testing.T) {
-	tests := []struct {
-		ax, ay, bx, by, cx, cy float64
-		want                   int
-	}{
-		{0, 0, 0, 1, 1, 0, -1},
-		{0, 0, 1, 0, 0, 1, 1},
-
-		{0, 1e-66, 0, 1e-66, 1e-65, 0, 0},
-		{0, 1e-66, 0, 2e-66, 1e-65, 0, -1},
-		{0, 1e-30, 0, 1e-30, 1e-65, 0, 0},
-		{1e-30, 0, 1e-30, 0, 0, 1e-65, 0},
-		{1e-30, 0, 0, 1e-65, 1e-30, 0, 0},
-
-		// https://blog.devgenius.io/floating-point-round-off-errors-in-geometric-algorithms-a8779662904b
-		//
-		// Failure 1 - seems to "work" in all cases, but golang differs slightly
-		{24.00000000000005, 24.000000000000053, 7.3000000000000194, 7.3000000000000167, 0.50000000000001621, 0.5000000000, 1},
-		// Failure 2 - This one produces 0 in faster and a slightly different version in golang
-		{27.643564356435643, -21.881188118811881, 83.366336633663366, 15.544554455445542, 73.415841584158414, 8.8613861386138595, 1},
-		// Failure 3 - All work, but faster gets a slightly different answer
-		{-233.33333333333334, 50.93333333333333, 200.0, 49.200000000000003, 166.66666666666669, 49.333333333333336, 1},
-		// Failure 4 - Both faster and golang are broken in this test
-		{0.50000000000001243, 0.50000000000000189, 24.000000000000068, 24.000000000000071, 17.300000000000001, 17.300000000000001, 1},
-
-		// TODO:
-		// http://wwwisg.cs.uni-magdeburg.de/ag/ClassroomExample/another_classroom_example_slides.pdf
-		// http://wwwisg.cs.uni-magdeburg.de/ag/ClassroomExample/another_classroom_example.pdf
-	}
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("basic: %d", i), func(t *testing.T) {
-			a := []float64{tt.ax, tt.ay}
-			b := []float64{tt.bx, tt.by}
-			c := []float64{tt.cx, tt.cy}
-			assert(t, tt.want, robust.Orient2(a, b, c))
-			assert(t, tt.want, robust.Orient2Ptr(&a[0], &b[0], &c[0]))
-
-			va := Vec2{tt.ax, tt.ay}
-			vb := Vec2{tt.bx, tt.by}
-			vc := Vec2{tt.cx, tt.cy}
-			assert(t, tt.want, robust.Orient2Vec((*robust.XY)(&va), (*robust.XY)(&vb), (*robust.XY)(&vc)))
-		})
-	}
-
 	fixtures := loadCases(t, "orient2.txt", 6)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {

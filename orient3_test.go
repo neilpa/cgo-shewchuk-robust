@@ -8,31 +8,6 @@ import (
 )
 
 func Test_Orient3(t *testing.T) {
-	tests := []struct {
-		ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz float64
-		want                                           int
-	}{
-		{0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1},
-		{0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, -1},
-	}
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("basic: %d", i), func(t *testing.T) {
-			a := []float64{tt.ax, tt.ay, tt.az}
-			b := []float64{tt.bx, tt.by, tt.bz}
-			c := []float64{tt.cx, tt.cy, tt.cz}
-			d := []float64{tt.dx, tt.dy, tt.dz}
-			assert(t, tt.want, robust.Orient3(a, b, c, d))
-			assert(t, tt.want, robust.Orient3Ptr(&a[0], &b[0], &c[0], &d[0]))
-
-			va := Vec3{tt.ax, tt.ay, tt.az}
-			vb := Vec3{tt.bx, tt.by, tt.bz}
-			vc := Vec3{tt.cx, tt.cy, tt.cz}
-			vd := Vec3{tt.dx, tt.dy, tt.dz}
-			res := robust.Orient3Vec((*robust.XYZ)(&va), (*robust.XYZ)(&vb), (*robust.XYZ)(&vc), (*robust.XYZ)(&vd))
-			assert(t, tt.want, res)
-		})
-	}
-
 	fixtures := loadCases(t, "orient3.txt", 12)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {

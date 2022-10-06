@@ -8,31 +8,6 @@ import (
 )
 
 func Test_InCircle(t *testing.T) {
-	tests := []struct {
-		ax, ay, bx, by, cx, cy, dx, dy float64
-		want                           int
-	}{
-		{0, 0, 1, 0, 0, 1, 0.5, 0.5, 1},
-		{0, 0, 0, 1, 1, 0, 0.5, 0.5, -1},
-	}
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("basic: %d", i), func(t *testing.T) {
-			a := []float64{tt.ax, tt.ay}
-			b := []float64{tt.bx, tt.by}
-			c := []float64{tt.cx, tt.cy}
-			d := []float64{tt.dx, tt.dy}
-			assert(t, tt.want, robust.InCircle(a, b, c, d))
-			assert(t, tt.want, robust.InCirclePtr(&a[0], &b[0], &c[0], &d[0]))
-
-			va := Vec2{tt.ax, tt.ay}
-			vb := Vec2{tt.bx, tt.by}
-			vc := Vec2{tt.cx, tt.cy}
-			vd := Vec2{tt.dx, tt.dy}
-			res := robust.InCircleVec((*robust.XY)(&va), (*robust.XY)(&vb), (*robust.XY)(&vc), (*robust.XY)(&vd))
-			assert(t, tt.want, res)
-		})
-	}
-
 	fixtures := loadCases(t, "incircle.txt", 8)
 	for i, tt := range fixtures {
 		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
