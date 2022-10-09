@@ -2,7 +2,7 @@
 // Jonathan Shewchuk. Only the primary adaptive functions are exported from
 // this package.
 //
-// <https://www.cs.cmu.edu/~quake/robust.html>
+// https://www.cs.cmu.edu/~quake/robust.html
 //
 // Each of the core functions takes `[]float64` arguments that should be
 // at least 2 or 3 values in length for the respective dimensionality. This
