@@ -14,8 +14,9 @@ type Vec3 struct{ X, Y, Z float64 }
 var result float64 // benchmark results
 
 type testcase struct {
-	args []float64
-	sign int
+	args  []float64 // input args to predicate function
+	sign  int       // sign of the return value from predicate
+	label string    // test case label (e.g. file and line number)
 }
 
 func loadCases(t testing.TB, path string, coords int) []testcase {
@@ -27,8 +28,8 @@ func loadCases(t testing.TB, path string, coords int) []testcase {
 
 	var tests []testcase
 	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		var tt testcase
+	for line := 1; scanner.Scan(); line++ {
+		tt := testcase{label: path + ":" + strconv.Itoa(line)}
 		parts := strings.Split(scanner.Text(), " ")
 
 		if strings.TrimSpace(parts[0]) == "" || parts[0][0] == '#' {

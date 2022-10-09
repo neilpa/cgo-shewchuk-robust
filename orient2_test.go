@@ -1,7 +1,6 @@
 package robust_test
 
 import (
-	"fmt"
 	"testing"
 
 	robust "neilpa.me/cgo-shewchuk-robust"
@@ -9,8 +8,8 @@ import (
 
 func Test_Orient2(t *testing.T) {
 	fixtures := loadCases(t, "orient2.txt", 6)
-	for i, tt := range fixtures {
-		t.Run(fmt.Sprintf("data: %d", i+1), func(t *testing.T) {
+	for _, tt := range fixtures {
+		t.Run(tt.label, func(t *testing.T) {
 			a := []float64{tt.args[0], tt.args[1]}
 			b := []float64{tt.args[2], tt.args[3]}
 			c := []float64{tt.args[4], tt.args[5]}
